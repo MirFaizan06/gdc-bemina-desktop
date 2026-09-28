@@ -1,0 +1,71 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+
+    <!--
+        College Admin — Windows installer (Stage 17). Built with the WiX Toolset (free, MIT-licensed)
+        via the "dotnet tool install" global wix package — no admin rights or system installer
+        needed to obtain the tool itself, unlike the MSI-based tools that caused problems earlier in
+        this project's local dev setup (see docs/claude/18_DEVLOG.md Entry 5). Pinned to WiX v5.0.2
+        deliberately: v6+ gates most commands behind an "Open Source Maintenance Fee" EULA
+        (https://wixtoolset.org/osmf/), which is a licensing decision, not a purely technical one —
+        v5 has no such gate and satisfies CLAUDE.md's "using only free tooling" requirement cleanly.
+
+        UpgradeCode below is fixed forever — every future release must reuse this exact GUID (only
+        ProductVersion changes) or Windows Installer will treat it as an unrelated product instead of
+        an upgrade.
+    -->
+    <Package Name="College Admin"
+             Manufacturer="Tech Bytes Design"
+             Version="$(var.ProductVersion)"
+             UpgradeCode="F23982CA-8D4C-4B11-9062-100503A14F76"
+             Language="1033"
+             Compressed="yes"
+             InstallerVersion="500">
+
+        <SummaryInformation Description="College Admin — internal college administration desktop app" Manufacturer="Tech Bytes Design" />
+
+        <!-- Final Convergence Phase P2 item 9 (docs/claude/FINAL_COMPLETION_TRACKER.md §4): standard
+             MSI Add/Remove Programs properties — Manufacturer above already carries the Company name
+             (CLAUDE.md's own requirement, also shown in Settings/Credits at runtime); these add the
+             Developer name/email alongside it, visible via msiexec's install summary and Windows'
+             own "Programs and Features" > program details view, not just inside the running app. -->
+        <Property Id="ARPCONTACT" Value="Mir Faizan (mirfaizan8803@gmail.com)" />
+        <Property Id="ARPCOMMENTS" Value="Developed by Mir Faizan for Tech Bytes Design." />
+
+        <MajorUpgrade DowngradeErrorMessage="A newer version of College Admin is already installed. Uninstall it first if you need to downgrade." />
+
+        <MediaTemplate EmbedCab="yes" />
+
+        <StandardDirectory Id="ProgramFiles64Folder">
+            <Directory Id="INSTALLFOLDER" Name="College Admin" />
+        </StandardDirectory>
+
+        <StandardDirectory Id="ProgramMenuFolder">
+            <Directory Id="ApplicationProgramsFolder" Name="College Admin" />
+        </StandardDirectory>
+
+        <ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER">
+            <Files Include="$(var.PublishDir)\**" />
+        </ComponentGroup>
+
+        <DirectoryRef Id="ApplicationProgramsFolder">
+            <Component Id="ApplicationShortcut" Guid="9C6E1A9F-2B7A-4F3E-9E51-0B7B6C6E2C1A">
+                <Shortcut Id="ApplicationStartMenuShortcut"
+                          Name="College Admin"
+                          Description="College internal administration"
+                          Target="[INSTALLFOLDER]CollegeAdmin.Desktop.exe"
+                          WorkingDirectory="INSTALLFOLDER" />
+                <RemoveFolder Id="RemoveApplicationProgramsFolder" On="uninstall" />
+                <RegistryValue Root="HKCU" Key="Software\TechBytesDesign\CollegeAdmin" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+            </Component>
+        </DirectoryRef>
+
+        <Feature Id="MainFeature" Title="College Admin" Level="1">
+            <ComponentGroupRef Id="AppFiles" />
+            <ComponentRef Id="ApplicationShortcut" />
+        </Feature>
+
+        <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+
+    </Package>
+</Wix>

@@ -1,0 +1,116 @@
+<Window x:Class="CollegeAdmin.Desktop.Views.NoticeCreateWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="{Binding WindowTitle}" Height="740" Width="460"
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
+        Background="{StaticResource PageBgBrush}">
+    <Grid Margin="28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- title label -->
+            <RowDefinition Height="Auto"/> <!-- title box -->
+            <RowDefinition Height="12"/>
+            <RowDefinition Height="Auto"/> <!-- body label -->
+            <RowDefinition Height="Auto"/> <!-- body box -->
+            <RowDefinition Height="12"/>
+            <RowDefinition Height="Auto"/> <!-- link/category row -->
+            <RowDefinition Height="12"/>
+            <RowDefinition Height="Auto"/> <!-- scope label -->
+            <RowDefinition Height="Auto"/> <!-- scope combo -->
+            <RowDefinition Height="Auto"/> <!-- scope id box -->
+            <RowDefinition Height="16"/>
+            <RowDefinition Height="Auto"/> <!-- marquee checkbox -->
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="Auto"/> <!-- publish/expire row -->
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="Auto"/> <!-- status label -->
+            <RowDefinition Height="Auto"/> <!-- status box -->
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="Auto"/> <!-- file label -->
+            <RowDefinition Height="Auto"/> <!-- file picker -->
+            <RowDefinition Height="16"/>
+            <RowDefinition Height="Auto"/> <!-- error -->
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/> <!-- buttons -->
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Title" Style="{StaticResource LabelText}"/>
+        <TextBox Grid.Row="1" Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <TextBlock Grid.Row="3" Text="Body" Style="{StaticResource LabelText}"/>
+        <TextBox Grid.Row="4" Text="{Binding Body, UpdateSourceTrigger=PropertyChanged}"
+                  Height="80" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+
+        <Grid Grid.Row="6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="Link (optional)" Style="{StaticResource LabelText}"/>
+                <TextBox Text="{Binding Link, UpdateSourceTrigger=PropertyChanged}"/>
+            </StackPanel>
+            <StackPanel Grid.Column="2">
+                <TextBlock Text="Category (optional)" Style="{StaticResource LabelText}"/>
+                <TextBox Text="{Binding Category, UpdateSourceTrigger=PropertyChanged}"/>
+            </StackPanel>
+        </Grid>
+
+        <TextBlock Grid.Row="8" Text="Scope" Style="{StaticResource LabelText}"/>
+        <ComboBox Grid.Row="9" ItemsSource="{Binding ScopeOptions}" SelectedItem="{Binding SelectedScope}"/>
+
+        <StackPanel Grid.Row="10" Margin="0,10,0,0" Visibility="{Binding IsDepartmentScope, Converter={StaticResource BoolToVisibility}}">
+            <TextBlock Text="Department ID" Style="{StaticResource LabelText}"/>
+            <TextBox Text="{Binding DepartmentId, UpdateSourceTrigger=PropertyChanged}"/>
+        </StackPanel>
+        <StackPanel Grid.Row="10" Margin="0,10,0,0" Visibility="{Binding IsCommitteeScope, Converter={StaticResource BoolToVisibility}}">
+            <TextBlock Text="Committee ID" Style="{StaticResource LabelText}"/>
+            <TextBox Text="{Binding CommitteeId, UpdateSourceTrigger=PropertyChanged}"/>
+        </StackPanel>
+
+        <!-- Final Convergence Phase P0-7: these 4 fields were fillable server-side with no desktop
+             form field at all until now. -->
+        <CheckBox Grid.Row="12" Content="Show in marquee (scrolling ticker)" IsChecked="{Binding IsMarquee}"/>
+
+        <Grid Grid.Row="14">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="Publish At (optional, YYYY-MM-DD HH:MM:SS)" Style="{StaticResource LabelText}"/>
+                <TextBox Text="{Binding PublishAt, UpdateSourceTrigger=PropertyChanged}"/>
+            </StackPanel>
+            <StackPanel Grid.Column="2">
+                <TextBlock Text="Expire At (optional)" Style="{StaticResource LabelText}"/>
+                <TextBox Text="{Binding ExpireAt, UpdateSourceTrigger=PropertyChanged}"/>
+            </StackPanel>
+        </Grid>
+
+        <TextBlock Grid.Row="16" Text="Status (published/draft)" Style="{StaticResource LabelText}"/>
+        <TextBox Grid.Row="17" Text="{Binding Status, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <TextBlock Grid.Row="19" Text="Attached File (optional)" Style="{StaticResource LabelText}"/>
+        <Grid Grid.Row="20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="0" IsReadOnly="True" Margin="0,0,8,0"
+                     Text="{Binding FilePathFileName, Mode=OneWay, TargetNullValue='(no file selected)'}"/>
+            <Button Grid.Column="1" Content="Browse..." Padding="10,6" Click="BrowseButton_Click"/>
+        </Grid>
+
+        <TextBlock Grid.Row="22" Text="{Binding ErrorMessage}" Style="{StaticResource ErrorText}"
+                   Visibility="{Binding ErrorMessage, Converter={StaticResource NullOrEmptyToCollapsed}}"/>
+
+        <StackPanel Grid.Row="24" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Cancel" Click="CancelButton_Click" Padding="14,7" Margin="0,0,8,0"/>
+            <Button Content="Save" Command="{Binding SaveCommand}" Style="{StaticResource PrimaryButton}" Padding="18,7" IsDefault="True"/>
+        </StackPanel>
+    </Grid>
+</Window>

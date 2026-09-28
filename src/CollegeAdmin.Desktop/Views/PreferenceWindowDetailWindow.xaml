@@ -1,0 +1,182 @@
+<Window x:Class="CollegeAdmin.Desktop.Views.PreferenceWindowDetailWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Preference Window" Height="700" Width="900"
+        WindowStartupLocation="CenterScreen" ResizeMode="CanResizeWithGrip"
+        Background="{StaticResource PageBgBrush}">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+            <TextBlock Style="{StaticResource SectionTitleText}">
+                <Run Text="{Binding Window.AcademicSession}"/>
+                <Run Text=" — Semester "/>
+                <Run Text="{Binding Window.Semester}"/>
+                <Run Text=" — "/>
+                <Run Text="{Binding Window.SubjectType}"/>
+            </TextBlock>
+            <Border Background="{StaticResource PrimaryBrush}" CornerRadius="4" Padding="8,3" Margin="12,4,0,0">
+                <TextBlock Text="{Binding Window.Status}" Foreground="White" FontSize="11" FontWeight="SemiBold"/>
+            </Border>
+        </StackPanel>
+
+        <Grid Grid.Row="1" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                <TextBlock Margin="0,0,16,0"><Run Text="Eligible: "/><Run Text="{Binding Summary.Eligible}"/></TextBlock>
+                <TextBlock Margin="0,0,16,0" Foreground="{StaticResource SuccessBrush}"><Run Text="Submitted: "/><Run Text="{Binding Summary.Submitted}"/></TextBlock>
+                <TextBlock Margin="0,0,16,0" Foreground="{StaticResource WarningBrush}"><Run Text="Not Submitted: "/><Run Text="{Binding Summary.NotSubmitted}"/></TextBlock>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Content="Open Window" Command="{Binding OpenWindowCommand}" Padding="14,7" Margin="0,0,8,0"
+                        Style="{StaticResource PrimaryButton}"
+                        Visibility="{Binding CanOpen, Converter={StaticResource BoolToVisibility}}"/>
+                <Button Content="Close Window" Command="{Binding CloseWindowCommand}" Padding="14,7"
+                        Visibility="{Binding CanClose, Converter={StaticResource BoolToVisibility}}"/>
+            </StackPanel>
+        </Grid>
+
+        <TabControl Grid.Row="2">
+            <TabItem Header="Submissions">
+                <Grid Margin="0,10,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <DataGrid Grid.Row="0" ItemsSource="{Binding Submissions}" AutoGenerateColumns="False" IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Student" Binding="{Binding StudentName}" Width="160"/>
+                            <DataGridTextColumn Header="Application No" Binding="{Binding StudentBoardRegNo}" Width="130"/>
+                            <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="90"/>
+                            <DataGridTextColumn Header="Submitted At" Binding="{Binding SubmittedAt}" Width="150"/>
+                            <DataGridTextColumn Header="Version" Binding="{Binding Version}" Width="60"/>
+                            <DataGridTemplateColumn Header="Choices" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ItemsControl ItemsSource="{Binding Choices}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Margin="0,0,8,0">
+                                                        <Run Text="{Binding RankOrder}"/><Run Text=". "/><Run Text="{Binding SubjectName}"/>
+                                                    </TextBlock>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                        </ItemsControl>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="" Width="180">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Content="Invalidate" FontSize="11" Padding="8,3" Margin="0,0,4,0"
+                                                    Command="{Binding DataContext.InvalidateSubmissionCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}"/>
+                                            <Button Content="Reopen" FontSize="11" Padding="8,3"
+                                                    Command="{Binding DataContext.ReopenSubmissionCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <StackPanel Grid.Row="1" Margin="0,10,0,0">
+                        <TextBlock Text="Reason (required before using a row's Invalidate button)" Style="{StaticResource LabelText}"/>
+                        <TextBox Text="{Binding InvalidateReason, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Allotment">
+                <Grid Margin="0,10,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0" Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Orientation="Horizontal"
+                                    Visibility="{Binding LatestRun, Converter={StaticResource NullOrEmptyToCollapsed}}">
+                            <TextBlock Margin="0,0,16,0"><Run Text="Run Status: "/><Run Text="{Binding LatestRun.Status}"/></TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Button Content="Run Allotment" Command="{Binding RunAllotmentCommand}" Padding="14,7" Margin="0,0,8,0"
+                                    Style="{StaticResource PrimaryButton}"
+                                    Visibility="{Binding CanRunAllotment, Converter={StaticResource BoolToVisibility}}"/>
+                            <Button Content="Finalize Run" Command="{Binding FinalizeRunCommand}" Padding="14,7"
+                                    Visibility="{Binding HasProposedRun, Converter={StaticResource BoolToVisibility}}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <DataGrid Grid.Row="1" ItemsSource="{Binding AllotmentResults}" AutoGenerateColumns="False" IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Student" Binding="{Binding StudentName}" Width="160"/>
+                            <DataGridTextColumn Header="Application No" Binding="{Binding StudentBoardRegNo}" Width="130"/>
+                            <DataGridTextColumn Header="Subject" Binding="{Binding SubjectName}" Width="150"/>
+                            <DataGridTextColumn Header="Status" Binding="{Binding AllotmentStatus}" Width="90"/>
+                            <DataGridTextColumn Header="Manual" Binding="{Binding IsManualOverride}" Width="60"/>
+                            <DataGridTemplateColumn Header="" Width="170">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Content="Override" FontSize="11" Padding="8,3" Margin="0,0,4,0"
+                                                    Command="{Binding DataContext.OverrideResultCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}"/>
+                                            <Button Content="Cancel" FontSize="11" Padding="8,3"
+                                                    Command="{Binding DataContext.CancelResultCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <Grid Grid.Row="2" Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,10,0" Width="140">
+                            <TextBlock Text="Replacement Subject ID" Style="{StaticResource LabelText}"/>
+                            <TextBox Text="{Binding OverrideSubjectId, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Reason (required before using a row's Override button)" Style="{StaticResource LabelText}"/>
+                            <TextBox Text="{Binding OverrideReason, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <TextBlock Grid.Row="3" Text="{Binding ErrorMessage}" Style="{StaticResource ErrorText}" Margin="0,8,0,0"
+                   Visibility="{Binding ErrorMessage, Converter={StaticResource NullOrEmptyToCollapsed}}"/>
+
+        <Button Grid.Row="4" Content="Close" Click="CloseButton_Click" Padding="14,7"
+                HorizontalAlignment="Right" Margin="0,16,0,0"/>
+    </Grid>
+</Window>

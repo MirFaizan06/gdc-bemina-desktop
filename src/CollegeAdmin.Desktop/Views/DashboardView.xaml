@@ -1,0 +1,85 @@
+<UserControl x:Class="CollegeAdmin.Desktop.Views.DashboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:shared="clr-namespace:CollegeAdmin.Desktop.Views.Shared"
+             mc:Ignorable="d">
+    <!-- Final Convergence Phase P1-14: every admin's landing page. Each stat card is visible only
+         when its value is non-null — the server omits a domain the caller has no grant for
+         entirely, so this screen never shows a misleading "0" for something the admin can't see. -->
+    <Grid>
+        <shared:LoadingView Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}"/>
+        <shared:ErrorStateView Message="{Binding ErrorMessage}" RetryCommand="{Binding LoadCommand}"
+                                Visibility="{Binding ErrorMessage, Converter={StaticResource NullOrEmptyToCollapsed}}"/>
+
+        <StackPanel Margin="4" Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibility}}">
+            <TextBlock Text="{Binding Greeting}" FontSize="26" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,2"/>
+            <TextBlock Text="Here's what's happening across the college today." Style="{StaticResource CaptionText}" Margin="0,0,0,20"/>
+
+            <ItemsControl>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,12,12" Width="160"
+                        Visibility="{Binding Stats.DepartmentCount, Converter={StaticResource NotNullToVisibility}}">
+                    <StackPanel>
+                        <TextBlock Text="Departments" Style="{StaticResource CaptionText}"/>
+                        <TextBlock Text="{Binding Stats.DepartmentCount}" FontSize="24" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,12,12" Width="160"
+                        Visibility="{Binding Stats.FacultyCount, Converter={StaticResource NotNullToVisibility}}">
+                    <StackPanel>
+                        <TextBlock Text="Faculty" Style="{StaticResource CaptionText}"/>
+                        <TextBlock Text="{Binding Stats.FacultyCount}" FontSize="24" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,12,12" Width="160"
+                        Visibility="{Binding Stats.CommitteeCount, Converter={StaticResource NotNullToVisibility}}">
+                    <StackPanel>
+                        <TextBlock Text="Committees" Style="{StaticResource CaptionText}"/>
+                        <TextBlock Text="{Binding Stats.CommitteeCount}" FontSize="24" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,12,12" Width="160"
+                        Visibility="{Binding Stats.NoticeCount, Converter={StaticResource NotNullToVisibility}}">
+                    <StackPanel>
+                        <TextBlock Text="Notices" Style="{StaticResource CaptionText}"/>
+                        <TextBlock Text="{Binding Stats.NoticeCount}" FontSize="24" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,12,12" Width="160"
+                        Visibility="{Binding Stats.UpcomingEventCount, Converter={StaticResource NotNullToVisibility}}">
+                    <StackPanel>
+                        <TextBlock Text="Upcoming Events" Style="{StaticResource CaptionText}"/>
+                        <TextBlock Text="{Binding Stats.UpcomingEventCount}" FontSize="24" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,12,12" Width="160"
+                        Visibility="{Binding Stats.TimetableEntryCount, Converter={StaticResource NotNullToVisibility}}">
+                    <StackPanel>
+                        <TextBlock Text="Timetable Entries" Style="{StaticResource CaptionText}"/>
+                        <TextBlock Text="{Binding Stats.TimetableEntryCount}" FontSize="24" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,12,12" Width="160"
+                        Visibility="{Binding Stats.ProgrammeCount, Converter={StaticResource NotNullToVisibility}}">
+                    <StackPanel>
+                        <TextBlock Text="Programmes" Style="{StaticResource CaptionText}"/>
+                        <TextBlock Text="{Binding Stats.ProgrammeCount}" FontSize="24" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,12,12" Width="160"
+                        Visibility="{Binding Stats.StudentCount, Converter={StaticResource NotNullToVisibility}}">
+                    <StackPanel>
+                        <TextBlock Text="Students" Style="{StaticResource CaptionText}"/>
+                        <TextBlock Text="{Binding Stats.StudentCount}" FontSize="24" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+            </ItemsControl>
+        </StackPanel>
+    </Grid>
+</UserControl>

@@ -1,0 +1,40 @@
+<UserControl x:Class="CollegeAdmin.Desktop.Views.AuditLogView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:views="clr-namespace:CollegeAdmin.Desktop.Views"
+             mc:Ignorable="d">
+    <!-- Final Convergence Phase P1-1: the desktop consumer for a fully-built, capability-gated
+         backend audit endpoint that had no screen at all until now. Filters are server-side (each
+         change re-queries via AuditLogViewModel's loader closure) — unlike Timetable's client-side
+         grid filter, since the server, not an already-loaded page, is the source of truth here. -->
+    <DockPanel>
+        <Border DockPanel.Dock="Top" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Action (e.g. create/update/delete)" Style="{StaticResource LabelText}"/>
+                    <TextBox Text="{Binding ActionFilter, UpdateSourceTrigger=PropertyChanged, Delay=400}"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="Entity (e.g. notice/student/programme)" Style="{StaticResource LabelText}"/>
+                    <TextBox Text="{Binding EntityFilter, UpdateSourceTrigger=PropertyChanged, Delay=400}"/>
+                </StackPanel>
+                <StackPanel Grid.Column="4">
+                    <TextBlock Text="Admin ID" Style="{StaticResource LabelText}"/>
+                    <TextBox Text="{Binding AdminIdFilter, UpdateSourceTrigger=PropertyChanged, Delay=400}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <views:GenericListView DataContext="{Binding List}"/>
+    </DockPanel>
+</UserControl>

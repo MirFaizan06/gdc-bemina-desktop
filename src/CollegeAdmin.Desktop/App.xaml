@@ -1,0 +1,23 @@
+﻿<Application x:Class="CollegeAdmin.Desktop.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:CollegeAdmin.Desktop"
+             xmlns:conv="clr-namespace:CollegeAdmin.Desktop.Converters">
+    <!-- No StartupUri: App.xaml.cs resolves MainWindow through the DI container in OnStartup
+         instead, so the window can receive constructor-injected dependencies from later stages. -->
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Theme/Colors.xaml"/>
+                <ResourceDictionary Source="Theme/Typography.xaml"/>
+                <ResourceDictionary Source="Theme/Controls.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <conv:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
+            <conv:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibility"/>
+            <conv:NullOrEmptyToCollapsedConverter x:Key="NullOrEmptyToCollapsed"/>
+            <conv:EqualsToVisibilityConverter x:Key="EqualsToVisibility"/>
+            <conv:NotNullToVisibilityConverter x:Key="NotNullToVisibility"/>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

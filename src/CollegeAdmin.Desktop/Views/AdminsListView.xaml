@@ -1,0 +1,80 @@
+<UserControl x:Class="CollegeAdmin.Desktop.Views.AdminsListView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:shared="clr-namespace:CollegeAdmin.Desktop.Views.Shared"
+             mc:Ignorable="d">
+    <Grid>
+        <shared:LoadingView Message="Loading admins..."
+                             Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}"/>
+
+        <shared:ErrorStateView Message="{Binding ErrorMessage}" RetryCommand="{Binding LoadCommand}"
+                                Visibility="{Binding ErrorMessage, Converter={StaticResource NullOrEmptyToCollapsed}}"/>
+
+        <shared:EmptyStateView Title="No admin accounts" Description="Admin accounts will appear here."
+                                Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVisibility}}"/>
+
+        <DockPanel Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibility}}">
+            <TextBlock DockPanel.Dock="Top" Text="Admin Users" Style="{StaticResource PageTitleText}" Margin="0,0,0,4"/>
+            <TextBlock DockPanel.Dock="Top" Text="{Binding StatusMessage}" Foreground="{StaticResource SuccessBrush}"
+                       FontSize="12" Margin="0,0,0,12"
+                       Visibility="{Binding StatusMessage, Converter={StaticResource NullOrEmptyToCollapsed}}"/>
+            <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1" CornerRadius="8" Padding="4">
+                <ListView ItemsSource="{Binding Admins}" BorderThickness="0" Background="Transparent">
+                    <ListView.Resources>
+                        <Style TargetType="GridViewColumnHeader">
+                            <Setter Property="Background" Value="{StaticResource PageBgBrush}"/>
+                            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="FontSize" Value="12"/>
+                            <Setter Property="Padding" Value="12,10"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                        </Style>
+                    </ListView.Resources>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="Padding" Value="12,8"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Name" Width="180" DisplayMemberBinding="{Binding Name}"/>
+                            <GridViewColumn Header="Email" Width="200" DisplayMemberBinding="{Binding Email}"/>
+                            <GridViewColumn Header="Role" Width="120" DisplayMemberBinding="{Binding Role}"/>
+                            <GridViewColumn Header="Status" Width="100">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding IsBanned, StringFormat='Banned: {0}'}"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="Actions" Width="390">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Content="Edit" Margin="0,0,6,0" Padding="10,4" FontSize="12"
+                                                    Click="EditButton_Click"/>
+                                            <Button Content="Ban" Margin="0,0,6,0" Padding="10,4" FontSize="12"
+                                                    Style="{StaticResource DangerButton}"
+                                                    Click="BanButton_Click"/>
+                                            <Button Content="Unban" Margin="0,0,6,0" Padding="10,4" FontSize="12"
+                                                    Command="{Binding DataContext.UnbanCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"/>
+                                            <Button Content="Force Logout" Padding="10,4" FontSize="12"
+                                                    Command="{Binding DataContext.ForceLogoutCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </Border>
+        </DockPanel>
+    </Grid>
+</UserControl>

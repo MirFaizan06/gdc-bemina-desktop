@@ -1,0 +1,105 @@
+<Window x:Class="CollegeAdmin.Desktop.Views.UniversityRrExportWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="University RR Export" Height="640" Width="900"
+        WindowStartupLocation="CenterScreen" ResizeMode="CanResizeWithGrip"
+        Background="{StaticResource PageBgBrush}">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock Text="University RR Export" Style="{StaticResource SectionTitleText}"/>
+
+            <!-- Final Convergence Phase P0-2: the 4 ADR-019 field mappings (BoardRegistrationNo
+                 source, Category field choice, Major derivation, SemesterBatch format) are reasoned,
+                 not verified against real university RR data — stays visible on every preview/export
+                 until a human confirms them and flips UniversityRrMapper::MAPPING_VERIFIED to true. -->
+            <Border Background="{StaticResource WarningBgBrush}" BorderBrush="{StaticResource WarningBrush}"
+                    BorderThickness="1" CornerRadius="6" Padding="10,6" Margin="0,10,0,0"
+                    Visibility="{Binding ShowMappingWarning, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock TextWrapping="Wrap" Foreground="{StaticResource WarningBrush}" FontSize="12">
+                    <Run Text="4 field mappings in this export (BoardRegistrationNo, Category, Major, SemesterBatch) are reasoned from the schema, not yet verified against a real university RR submission — see ADR-019."/>
+                </TextBlock>
+            </Border>
+        </StackPanel>
+
+        <Grid Grid.Row="1" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                <TextBlock Text="Academic Session (e.g. 2026-27)" Style="{StaticResource LabelText}"/>
+                <TextBox Text="{Binding AcademicSession, UpdateSourceTrigger=PropertyChanged}"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Margin="0,0,10,0">
+                <TextBlock Text="Semester" Style="{StaticResource LabelText}"/>
+                <TextBox Text="{Binding Semester, UpdateSourceTrigger=PropertyChanged}"/>
+            </StackPanel>
+            <StackPanel Grid.Column="2">
+                <TextBlock Text="Programme (optional — blank = all)" Style="{StaticResource LabelText}"/>
+                <ComboBox ItemsSource="{Binding ProgrammeOptions}" DisplayMemberPath="Label" SelectedValuePath="Value"
+                          SelectedValue="{Binding ProgrammeId, UpdateSourceTrigger=PropertyChanged}"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="2" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Visibility="{Binding Totals, Converter={StaticResource NullOrEmptyToCollapsed}}">
+                <TextBlock Margin="0,0,16,0"><Run Text="Total: "/><Run Text="{Binding Totals.Total}"/></TextBlock>
+                <TextBlock Margin="0,0,16,0" Foreground="{StaticResource SuccessBrush}"><Run Text="Ready: "/><Run Text="{Binding Totals.Ready}"/></TextBlock>
+                <TextBlock Margin="0,0,16,0" Foreground="{StaticResource WarningBrush}"><Run Text="Warning: "/><Run Text="{Binding Totals.Warning}"/></TextBlock>
+                <TextBlock Margin="0,0,16,0" Foreground="{StaticResource DangerBrush}"><Run Text="Blocked: "/><Run Text="{Binding Totals.Blocked}"/></TextBlock>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Content="Preview" Command="{Binding PreviewCommand}" Padding="14,7" Margin="0,0,8,0"/>
+                <Button Content="Export XLSX" Command="{Binding ExportCommand}" Padding="14,7"
+                        Style="{StaticResource PrimaryButton}"/>
+            </StackPanel>
+        </Grid>
+
+        <DataGrid Grid.Row="3" ItemsSource="{Binding Rows}" AutoGenerateColumns="False" IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Student" Binding="{Binding StudentName}" Width="200"/>
+                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="100"/>
+                <DataGridTemplateColumn Header="Issues" Width="*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ItemsControl ItemsSource="{Binding Issues}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}" TextWrapping="Wrap" FontSize="12" Margin="0,0,0,2"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <StackPanel Grid.Row="4" Margin="0,8,0,0">
+            <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource ErrorText}"
+                       Visibility="{Binding ErrorMessage, Converter={StaticResource NullOrEmptyToCollapsed}}"/>
+            <TextBlock Text="{Binding ResultMessage}" Foreground="{StaticResource SuccessBrush}"
+                       Visibility="{Binding ResultMessage, Converter={StaticResource NullOrEmptyToCollapsed}}"/>
+        </StackPanel>
+
+        <Button Grid.Row="5" Content="Close" Click="CloseButton_Click" Padding="14,7"
+                HorizontalAlignment="Right" Margin="0,16,0,0"/>
+    </Grid>
+</Window>

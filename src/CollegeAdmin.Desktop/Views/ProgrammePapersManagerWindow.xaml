@@ -1,0 +1,99 @@
+<Window x:Class="CollegeAdmin.Desktop.Views.ProgrammePapersManagerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:shared="clr-namespace:CollegeAdmin.Desktop.Views.Shared"
+        mc:Ignorable="d"
+        Title="{Binding ProgrammeName, StringFormat='Papers — {0}'}" Height="600" Width="560"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource PageBgBrush}">
+    <Grid Margin="28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="{Binding ProgrammeName, StringFormat='Papers in {0}'}"
+                   Style="{StaticResource SectionTitleText}" Margin="0,0,0,16"/>
+
+        <!-- Add paper -->
+        <Border Grid.Row="1" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,16">
+            <StackPanel>
+                <TextBlock Text="Title" Style="{StaticResource LabelText}"/>
+                <TextBox Text="{Binding NewTitle, UpdateSourceTrigger=PropertyChanged}"/>
+                <Grid Margin="0,10,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Semester" Style="{StaticResource LabelText}"/>
+                        <TextBox Text="{Binding NewSemester, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Type (Major/Minor/AEC/MDC/SEC/VAC 1/VAC 2)" Style="{StaticResource LabelText}"/>
+                        <TextBox Text="{Binding NewPaperType, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="4">
+                        <TextBlock Text="Paper Code (optional)" Style="{StaticResource LabelText}"/>
+                        <TextBox Text="{Binding NewPaperCode, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+                </Grid>
+                <Button Content="Add Paper" Command="{Binding AddPaperCommand}" Style="{StaticResource PrimaryButton}"
+                        HorizontalAlignment="Left" Margin="0,12,0,0" Padding="14,6"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Paper list -->
+        <Grid Grid.Row="2">
+            <shared:LoadingView Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}"/>
+            <shared:ErrorStateView Message="{Binding ErrorMessage}" RetryCommand="{Binding LoadCommand}"
+                                    Visibility="{Binding ErrorMessage, Converter={StaticResource NullOrEmptyToCollapsed}}"/>
+            <shared:EmptyStateView Title="No papers yet" Description="Papers you add will appear here."
+                                    Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVisibility}}"/>
+            <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1" CornerRadius="8"
+                    Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibility}}">
+                <ListBox ItemsSource="{Binding Papers}" BorderThickness="0" Background="Transparent" Padding="4">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8">
+                                <DockPanel LastChildFill="True">
+                                    <Button Content="Delete" DockPanel.Dock="Right" FontSize="11" Padding="8,3"
+                                            Style="{StaticResource DangerButton}"
+                                            Command="{Binding DataContext.DeletePaperCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                            CommandParameter="{Binding}"/>
+                                    <StackPanel Margin="0,0,12,0">
+                                        <TextBlock Style="{StaticResource BodyText}">
+                                            <Run Text="{Binding Title, Mode=OneWay}" FontWeight="SemiBold"/>
+                                            <Run Text=" ("/>
+                                            <Run Text="{Binding PaperType, Mode=OneWay}"/>
+                                            <Run Text=")"/>
+                                        </TextBlock>
+                                        <TextBlock Style="{StaticResource CaptionText}">
+                                            <Run Text="Semester "/>
+                                            <Run Text="{Binding Semester, Mode=OneWay}"/>
+                                            <Run Text=" — "/>
+                                            <Run Text="{Binding Status, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </DockPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Border>
+        </Grid>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="Close" Click="CloseButton_Click" Padding="14,7"/>
+        </StackPanel>
+    </Grid>
+</Window>

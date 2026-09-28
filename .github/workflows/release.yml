@@ -1,0 +1,60 @@
+name: Release
+
+# Triggered by pushing a version tag: git tag v1.1.0 && git push origin v1.1.0
+# Builds the self-contained win-x64 app, packages the WiX v5 MSI, computes its SHA-256, and
+# publishes both as a GitHub Release — UpdateService (desktop app) reads this release directly via
+# the public Releases API, no server involvement at all.
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write # required to create the Release and upload assets
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Extract version from tag
+        id: version
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}" -replace '^v', ''
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Install WiX v5
+        shell: pwsh
+        run: |
+          dotnet tool install --global wix --version 5.0.2
+          wix extension add --global WixToolset.UI.wixext/5.0.2
+          wix extension add --global WixToolset.Util.wixext/5.0.2
+
+      - name: Build installer
+        shell: pwsh
+        run: .\installer\build.ps1 -Version "${{ steps.version.outputs.version }}"
+
+      - name: Compute SHA-256
+        shell: pwsh
+        run: |
+          $msi = "installer\CollegeAdminSetup-${{ steps.version.outputs.version }}.msi"
+          (Get-FileHash $msi -Algorithm SHA256).Hash.ToLower() | Out-File -Encoding ascii -NoNewline "$msi.sha256"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "College Admin ${{ steps.version.outputs.version }}"
+          body: |
+            ## What's new
+            <!-- Fill in before/after publishing — this text becomes the desktop app's
+                 "What's New" panel (Final Convergence Phase P2 item 10). -->
+          files: |
+            installer/CollegeAdminSetup-${{ steps.version.outputs.version }}.msi
+            installer/CollegeAdminSetup-${{ steps.version.outputs.version }}.msi.sha256
+          fail_on_unmatched_files: true

@@ -1,0 +1,142 @@
+<UserControl x:Class="CollegeAdmin.Desktop.Views.PrincipalOverviewView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:shared="clr-namespace:CollegeAdmin.Desktop.Views.Shared"
+             mc:Ignorable="d">
+    <!-- Final Convergence Phase P1-3: the read-only cross-module "Institution Overview" a
+         Principal-role admin lands on. Deliberately minimal compared to legacy's chart-heavy
+         dashboard — real per-role dashboards are P1-14's job; every number here is a real query,
+         not a placeholder, and nothing on this screen writes anything. -->
+    <Grid>
+        <shared:LoadingView Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}"/>
+        <shared:ErrorStateView Message="{Binding ErrorMessage}" RetryCommand="{Binding LoadCommand}"
+                                Visibility="{Binding ErrorMessage, Converter={StaticResource NullOrEmptyToCollapsed}}"/>
+
+        <ScrollViewer Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibility}}">
+            <StackPanel Margin="4">
+                <TextBlock Text="Institution Overview" Style="{StaticResource SectionTitleText}" Margin="0,0,0,4"/>
+                <TextBlock Text="Read-only — reflects the same live data every other admin sees." Style="{StaticResource CaptionText}" Margin="0,0,0,16"/>
+
+                <ItemsControl>
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,12,12" Width="160">
+                        <StackPanel>
+                            <TextBlock Text="Departments" Style="{StaticResource CaptionText}"/>
+                            <TextBlock Text="{Binding Stats.DepartmentCount}" FontSize="24" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,12,12" Width="160">
+                        <StackPanel>
+                            <TextBlock Text="Active Faculty" Style="{StaticResource CaptionText}"/>
+                            <TextBlock Text="{Binding Stats.FacultyActive}" FontSize="24" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,12,12" Width="160">
+                        <StackPanel>
+                            <TextBlock Text="Active Committees" Style="{StaticResource CaptionText}"/>
+                            <TextBlock Text="{Binding Stats.CommitteeActive}" FontSize="24" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,12,12" Width="160">
+                        <StackPanel>
+                            <TextBlock Text="Programmes" Style="{StaticResource CaptionText}"/>
+                            <TextBlock Text="{Binding Stats.ProgrammeCount}" FontSize="24" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,12,12" Width="160">
+                        <StackPanel>
+                            <TextBlock Text="Documents" Style="{StaticResource CaptionText}"/>
+                            <TextBlock Text="{Binding Stats.DocumentCount}" FontSize="24" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,12,12" Width="160">
+                        <StackPanel>
+                            <TextBlock Text="Notices (Published / Draft)" Style="{StaticResource CaptionText}"/>
+                            <TextBlock Text="{Binding Stats.NoticePublished}" FontSize="24" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding Stats.NoticeDraft, StringFormat='{}{0} draft'}" Style="{StaticResource CaptionText}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,12,12" Width="160">
+                        <StackPanel>
+                            <TextBlock Text="News Published" Style="{StaticResource CaptionText}"/>
+                            <TextBlock Text="{Binding Stats.NewsPublished}" FontSize="24" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,12,12" Width="160">
+                        <StackPanel>
+                            <TextBlock Text="Events (Upcoming / Past)" Style="{StaticResource CaptionText}"/>
+                            <TextBlock Text="{Binding Stats.EventsUpcoming}" FontSize="24" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding Stats.EventsPast, StringFormat='{}{0} past'}" Style="{StaticResource CaptionText}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,12,12" Width="160">
+                        <StackPanel>
+                            <TextBlock Text="Gallery (Albums / Images)" Style="{StaticResource CaptionText}"/>
+                            <TextBlock Text="{Binding Stats.GalleryAlbums}" FontSize="24" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding Stats.GalleryImages, StringFormat='{}{0} images'}" Style="{StaticResource CaptionText}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,12,12" Width="160">
+                        <StackPanel>
+                            <TextBlock Text="Students (Active / Total)" Style="{StaticResource CaptionText}"/>
+                            <TextBlock Text="{Binding StudentStats.Active}" FontSize="24" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding StudentStats.Total, StringFormat='{}{0} total'}" Style="{StaticResource CaptionText}"/>
+                        </StackPanel>
+                    </Border>
+                </ItemsControl>
+
+                <TextBlock Text="Faculty by Department" Style="{StaticResource SectionTitleText}" FontSize="16" Margin="0,16,0,8"/>
+                <ItemsControl ItemsSource="{Binding FacultyByDept}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Margin="0,0,0,4">
+                                <Run Text="{Binding DeptName, Mode=OneWay}" FontWeight="SemiBold"/>
+                                <Run Text=" — "/>
+                                <Run Text="{Binding FacultyCount, Mode=OneWay}"/>
+                            </TextBlock>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <TextBlock Text="Admins by Role" Style="{StaticResource SectionTitleText}" FontSize="16" Margin="0,16,0,8"/>
+                <ItemsControl ItemsSource="{Binding AdminsByRole}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Margin="0,0,0,4">
+                                <Run Text="{Binding Role, Mode=OneWay}" FontWeight="SemiBold"/>
+                                <Run Text=" — "/>
+                                <Run Text="{Binding Cnt, Mode=OneWay}"/>
+                            </TextBlock>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <TextBlock Text="Recent Activity" Style="{StaticResource SectionTitleText}" FontSize="16" Margin="0,16,0,8"/>
+                <ItemsControl ItemsSource="{Binding RecentActivity}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="0,6">
+                                <StackPanel>
+                                    <TextBlock>
+                                        <Run Text="{Binding AdminName, Mode=OneWay}" FontWeight="SemiBold"/>
+                                        <Run Text=" "/>
+                                        <Run Text="{Binding Action, Mode=OneWay}"/>
+                                        <Run Text=" "/>
+                                        <Run Text="{Binding Entity, Mode=OneWay}"/>
+                                    </TextBlock>
+                                    <TextBlock Text="{Binding CreatedAt}" Style="{StaticResource CaptionText}"/>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

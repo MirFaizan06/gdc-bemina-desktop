@@ -1,0 +1,90 @@
+<Window x:Class="CollegeAdmin.Desktop.Views.GalleryImageManagerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:shared="clr-namespace:CollegeAdmin.Desktop.Views.Shared"
+        mc:Ignorable="d"
+        Title="{Binding AlbumTitle, StringFormat='Images — {0}'}" Height="560" Width="520"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource PageBgBrush}">
+    <Grid Margin="28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="{Binding AlbumTitle, StringFormat='Images in {0}'}"
+                   Style="{StaticResource SectionTitleText}" Margin="0,0,0,16"/>
+
+        <!-- Add image -->
+        <Border Grid.Row="1" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,16">
+            <StackPanel>
+                <TextBlock Text="Image" Style="{StaticResource LabelText}"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0" IsReadOnly="True" Margin="0,0,8,0"
+                             Text="{Binding NewImageFileName, Mode=OneWay, TargetNullValue='(no file selected)'}"/>
+                    <Button Grid.Column="1" Content="Browse..." Padding="10,6" Click="BrowseButton_Click"/>
+                </Grid>
+                <TextBlock Text="Caption (optional)" Style="{StaticResource LabelText}" Margin="0,10,0,4"/>
+                <TextBox Text="{Binding NewImageCaption, UpdateSourceTrigger=PropertyChanged}"/>
+                <Button Content="Add Image" Command="{Binding AddImageCommand}" Style="{StaticResource PrimaryButton}"
+                        HorizontalAlignment="Left" Margin="0,12,0,0" Padding="14,6"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Image list -->
+        <Grid Grid.Row="2">
+            <shared:LoadingView Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}"/>
+            <shared:ErrorStateView Message="{Binding ErrorMessage}" RetryCommand="{Binding LoadCommand}"
+                                    Visibility="{Binding ErrorMessage, Converter={StaticResource NullOrEmptyToCollapsed}}"/>
+            <shared:EmptyStateView Title="No images yet" Description="Images you add will appear here."
+                                    Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVisibility}}"/>
+            <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1" CornerRadius="8"
+                    Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibility}}">
+                <ListBox ItemsSource="{Binding Images}" BorderThickness="0" Background="Transparent" Padding="4">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8">
+                                <DockPanel LastChildFill="True">
+                                    <Button Content="Delete" DockPanel.Dock="Right" FontSize="11" Padding="8,3"
+                                            Style="{StaticResource DangerButton}"
+                                            Command="{Binding DataContext.DeleteImageCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                            CommandParameter="{Binding}"/>
+                                    <!-- Final Convergence Phase P1-8: gallery_images.sort_order could
+                                         only ever be set at creation time before this — nothing could
+                                         reorder an existing image. -->
+                                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="0,0,8,0">
+                                        <Button Content="▲" ToolTip="Move up" FontSize="11" Padding="8,3" Margin="0,0,4,0"
+                                                Command="{Binding DataContext.MoveImageUpCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding}"/>
+                                        <Button Content="▼" ToolTip="Move down" FontSize="11" Padding="8,3"
+                                                Command="{Binding DataContext.MoveImageDownCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding}"/>
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,12,0">
+                                        <TextBlock Text="{Binding ImagePath}" Style="{StaticResource BodyText}" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding Caption}" Style="{StaticResource CaptionText}"
+                                                   Visibility="{Binding Caption, Converter={StaticResource NullOrEmptyToCollapsed}}"/>
+                                    </StackPanel>
+                                </DockPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Border>
+        </Grid>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="Close" Click="CloseButton_Click" Padding="14,7"/>
+        </StackPanel>
+    </Grid>
+</Window>

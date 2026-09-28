@@ -1,0 +1,37 @@
+<UserControl x:Class="CollegeAdmin.Desktop.Views.BackgroundJobsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:shared="clr-namespace:CollegeAdmin.Desktop.Views.Shared"
+             mc:Ignorable="d">
+    <Grid>
+        <shared:LoadingView Message="Loading jobs..."
+                             Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}"/>
+        <shared:ErrorStateView Message="{Binding ErrorMessage}" RetryCommand="{Binding LoadCommand}"
+                                Visibility="{Binding ErrorMessage, Converter={StaticResource NullOrEmptyToCollapsed}}"/>
+        <DockPanel Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibility}}">
+            <StackPanel DockPanel.Dock="Top" Margin="0,0,0,16">
+                <DockPanel LastChildFill="False">
+                    <TextBlock Text="Background Jobs" Style="{StaticResource PageTitleText}" DockPanel.Dock="Left"/>
+                    <Button Content="Run Session Cleanup Now" Command="{Binding RunCleanupCommand}"
+                            Style="{StaticResource PrimaryButton}" DockPanel.Dock="Right"/>
+                </DockPanel>
+                <TextBlock Text="Prunes revoked/expired login sessions older than 30 days. Runs on demand here — a real deployment should also schedule scripts/run-jobs.php via cron."
+                           Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="0,8,0,0"/>
+                <TextBlock Text="{Binding StatusMessage}" Foreground="{StaticResource SuccessBrush}" FontSize="12" Margin="0,8,0,0"
+                           Visibility="{Binding StatusMessage, Converter={StaticResource NullOrEmptyToCollapsed}}"/>
+            </StackPanel>
+
+            <shared:EmptyStateView Title="No jobs yet" Description="Jobs you run will appear here."
+                                    Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVisibility}}"/>
+
+            <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1" CornerRadius="8" Padding="0"
+                    Visibility="{Binding IsEmpty, Converter={StaticResource InverseBoolToVisibility}}">
+                <DataGrid ItemsSource="{Binding Jobs}" AutoGenerateColumns="True" IsReadOnly="True"
+                          CanUserAddRows="False" CanUserDeleteRows="False" BorderThickness="0"/>
+            </Border>
+        </DockPanel>
+    </Grid>
+</UserControl>

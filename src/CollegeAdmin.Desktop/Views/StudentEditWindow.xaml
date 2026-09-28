@@ -1,0 +1,94 @@
+<Window x:Class="CollegeAdmin.Desktop.Views.StudentEditWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="{Binding Title}" Height="680" Width="560"
+        WindowStartupLocation="CenterScreen" ResizeMode="CanResizeWithGrip"
+        Background="{StaticResource PageBgBrush}">
+    <Grid Margin="28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
+            <TextBlock Text="{Binding Title}" Style="{StaticResource SectionTitleText}"/>
+            <Border Background="{StaticResource PrimaryBrush}" CornerRadius="4" Padding="8,3" Margin="12,0,0,0"
+                    VerticalAlignment="Center" Visibility="{Binding IsEditMode, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock Text="{Binding Lifecycle}" Foreground="White" FontSize="11" FontWeight="SemiBold"/>
+            </Border>
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <ItemsControl ItemsSource="{Binding Sections}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="0,0,0,18">
+                                <TextBlock Text="{Binding Title}" Style="{StaticResource LabelText}" FontWeight="Bold"
+                                           Margin="0,0,0,8" FontSize="13"/>
+                                <ItemsControl ItemsSource="{Binding Fields}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Margin="0,0,0,10">
+                                                <TextBlock Text="{Binding DisplayLabel}" Style="{StaticResource LabelText}"/>
+                                                <!-- Final Convergence Phase P1-19: mirrors
+                                                     GenericCreateWindow.xaml's Options/ComboBox
+                                                     toggle — the Programme field renders as a real
+                                                     picker instead of a free-text box; every other
+                                                     field here is unaffected. -->
+                                                <ComboBox ItemsSource="{Binding Options}" DisplayMemberPath="Label" SelectedValuePath="Value"
+                                                          SelectedValue="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
+                                                          Visibility="{Binding HasOptions, Converter={StaticResource BoolToVisibility}}"/>
+                                                <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
+                                                         AcceptsReturn="{Binding IsMultiline}" TextWrapping="Wrap"
+                                                         MinHeight="34" MaxHeight="100" VerticalScrollBarVisibility="Auto"
+                                                         Visibility="{Binding IsPlainText, Converter={StaticResource BoolToVisibility}}"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <ItemsControl ItemsSource="{Binding DuplicateWarnings}" Margin="0,0,0,8">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="#FFF6E5" BorderBrush="#F0C36D" BorderThickness="1" CornerRadius="4"
+                                    Padding="10,6" Margin="0,0,0,6">
+                                <TextBlock Text="{Binding}" TextWrapping="Wrap" FontSize="12"/>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </ScrollViewer>
+
+        <TextBlock Grid.Row="2" Text="{Binding ErrorMessage}" Style="{StaticResource ErrorText}" Margin="0,8,0,0"
+                   Visibility="{Binding ErrorMessage, Converter={StaticResource NullOrEmptyToCollapsed}}"/>
+
+        <Grid Grid.Row="3" Margin="0,16,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0" Content="Archive" Click="ArchiveButton_Click" Padding="14,7"
+                    HorizontalAlignment="Left"
+                    Visibility="{Binding CanArchive, Converter={StaticResource BoolToVisibility}}"/>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Content="Cancel" Click="CancelButton_Click" Padding="14,7" Margin="0,0,8,0"/>
+                <Button Content="Save Draft" Command="{Binding SaveDraftCommand}" Padding="14,7" Margin="0,0,8,0"/>
+                <Button Content="Save &amp; Finalize" Command="{Binding FinalizeCommand}"
+                        Style="{StaticResource PrimaryButton}" Padding="18,7" IsDefault="True"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

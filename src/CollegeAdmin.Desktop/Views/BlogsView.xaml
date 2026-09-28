@@ -1,0 +1,97 @@
+<UserControl x:Class="CollegeAdmin.Desktop.Views.BlogsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:shared="clr-namespace:CollegeAdmin.Desktop.Views.Shared"
+             mc:Ignorable="d">
+    <!-- Final Convergence Phase P1-10/§2b: moderation only — public submission and self-service
+         edit-by-token stay on the legacy website. -->
+    <Grid>
+        <shared:LoadingView Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}"/>
+        <shared:ErrorStateView Message="{Binding ErrorMessage}" RetryCommand="{Binding LoadCommand}"
+                                Visibility="{Binding ErrorMessage, Converter={StaticResource NullOrEmptyToCollapsed}}"/>
+
+        <ScrollViewer Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibility}}">
+            <StackPanel Margin="4">
+                <TextBlock Text="Blog Moderation" Style="{StaticResource SectionTitleText}" Margin="0,0,0,4"/>
+                <TextBlock Text="{Binding StatusMessage}" Style="{StaticResource CaptionText}" Margin="0,0,0,12"
+                           Visibility="{Binding StatusMessage, Converter={StaticResource NullOrEmptyToCollapsed}}"/>
+
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,8,0">
+                            <StackPanel>
+                                <TextBlock Text="Pending" Style="{StaticResource CaptionText}"/>
+                                <TextBlock Text="{Binding Counts.Pending}" FontSize="20" FontWeight="Bold"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,8,0">
+                            <StackPanel>
+                                <TextBlock Text="Published" Style="{StaticResource CaptionText}"/>
+                                <TextBlock Text="{Binding Counts.Published}" FontSize="20" FontWeight="Bold"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="12">
+                            <StackPanel>
+                                <TextBlock Text="Rejected" Style="{StaticResource CaptionText}"/>
+                                <TextBlock Text="{Binding Counts.Rejected}" FontSize="20" FontWeight="Bold"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" VerticalAlignment="Bottom">
+                        <TextBlock Text="Status filter (pending/published/rejected/blank=all)" Style="{StaticResource LabelText}"/>
+                        <TextBox Text="{Binding StatusFilter, UpdateSourceTrigger=PropertyChanged, Delay=400}" Width="240"/>
+                    </StackPanel>
+                </Grid>
+
+                <ItemsControl ItemsSource="{Binding Posts}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,10">
+                                <DockPanel LastChildFill="True">
+                                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top">
+                                        <Button Content="Approve" FontSize="11" Padding="10,5" Margin="0,0,6,0"
+                                                Style="{StaticResource PrimaryButton}"
+                                                Command="{Binding DataContext.ApproveCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                Visibility="{Binding Status, Converter={StaticResource EqualsToVisibility}, ConverterParameter=pending}"/>
+                                        <Button Content="Reject" FontSize="11" Padding="10,5" Margin="0,0,6,0"
+                                                Style="{StaticResource DangerButton}" Click="RejectButton_Click" Tag="{Binding}"
+                                                Visibility="{Binding Status, Converter={StaticResource EqualsToVisibility}, ConverterParameter=pending}"/>
+                                        <Button Content="Delete" FontSize="11" Padding="10,5"
+                                                Style="{StaticResource DangerButton}"
+                                                Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"/>
+                                    </StackPanel>
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource BodyText}">
+                                            <Run Text="{Binding Title, Mode=OneWay}" FontWeight="SemiBold"/>
+                                            <Run Text=" — "/>
+                                            <Run Text="{Binding AuthorName, Mode=OneWay}"/>
+                                        </TextBlock>
+                                        <TextBlock Text="{Binding Excerpt}" Style="{StaticResource CaptionText}" TextWrapping="Wrap"
+                                                   Visibility="{Binding Excerpt, Converter={StaticResource NullOrEmptyToCollapsed}}"/>
+                                        <TextBlock Style="{StaticResource CaptionText}">
+                                            <Run Text="Status: "/>
+                                            <Run Text="{Binding Status, Mode=OneWay}"/>
+                                            <Run Text=" · Views: "/>
+                                            <Run Text="{Binding Views, Mode=OneWay}"/>
+                                        </TextBlock>
+                                        <TextBlock Text="{Binding RejectionReason}" Style="{StaticResource CaptionText}" Foreground="#B91C1C"
+                                                   Visibility="{Binding RejectionReason, Converter={StaticResource NullOrEmptyToCollapsed}}"/>
+                                    </StackPanel>
+                                </DockPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

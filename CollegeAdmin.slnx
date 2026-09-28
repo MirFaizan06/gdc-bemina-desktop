@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/CollegeAdmin.Application/CollegeAdmin.Application.csproj" />
+    <Project Path="src/CollegeAdmin.Contracts/CollegeAdmin.Contracts.csproj" />
+    <Project Path="src/CollegeAdmin.Desktop/CollegeAdmin.Desktop.csproj" />
+    <Project Path="src/CollegeAdmin.Domain/CollegeAdmin.Domain.csproj" />
+    <Project Path="src/CollegeAdmin.Infrastructure/CollegeAdmin.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CollegeAdmin.Desktop.Tests/CollegeAdmin.Desktop.Tests.csproj" />
+    <Project Path="tests/CollegeAdmin.Domain.Tests/CollegeAdmin.Domain.Tests.csproj" />
+    <Project Path="tests/CollegeAdmin.Infrastructure.Tests/CollegeAdmin.Infrastructure.Tests.csproj" />
+  </Folder>
+</Solution>

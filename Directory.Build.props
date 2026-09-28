@@ -1,0 +1,12 @@
+<Project>
+  <!-- Shared across every project in the solution so the whole product ships as one version
+       number — the updater compares THIS value (via the entry assembly) against the server's
+       published release manifest, and the installer (desktop/installer) reads it too, so there is
+       exactly one place that needs bumping per release. -->
+  <PropertyGroup>
+    <Version>1.0.0</Version>
+    <Company>Tech Bytes Design</Company>
+    <Product>College Admin</Product>
+    <Authors>Mir Faizan</Authors>
+  </PropertyGroup>
+</Project>

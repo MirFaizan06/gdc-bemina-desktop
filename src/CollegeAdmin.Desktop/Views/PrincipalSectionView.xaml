@@ -1,0 +1,54 @@
+<UserControl x:Class="CollegeAdmin.Desktop.Views.PrincipalSectionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:shared="clr-namespace:CollegeAdmin.Desktop.Views.Shared"
+             mc:Ignorable="d">
+    <!-- Final Convergence Phase P1-10/§2b: the desktop consumer for the new
+         PrincipalSectionController — the public Principal's-message website content. A single-row
+         settings-shaped form, not a list, so this is its own small View rather than forced into
+         GenericListView/GenericCreateWindow's shape. -->
+    <Grid>
+        <shared:LoadingView Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}"/>
+
+        <ScrollViewer Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibility}}">
+            <Border MaxWidth="480" HorizontalAlignment="Left" Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="10" Padding="28" Margin="4">
+                <StackPanel>
+                    <TextBlock Text="Principal's Message" Style="{StaticResource SectionTitleText}" Margin="0,0,0,4"/>
+                    <TextBlock Text="Shown on the homepage and About page." Style="{StaticResource CaptionText}" Margin="0,0,0,20"/>
+
+                    <TextBlock Text="Name" Style="{StaticResource LabelText}"/>
+                    <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,12"/>
+
+                    <TextBlock Text="Designation" Style="{StaticResource LabelText}"/>
+                    <TextBox Text="{Binding Designation, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,12"/>
+
+                    <TextBlock Text="Photo (500 × 600 px portrait or square)" Style="{StaticResource LabelText}"/>
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" IsReadOnly="True" Margin="0,0,8,0"
+                                 Text="{Binding DisplayPhotoName, Mode=OneWay}"/>
+                        <Button Grid.Column="1" Content="Browse..." Padding="10,6" Click="BrowseButton_Click"/>
+                    </Grid>
+
+                    <TextBlock Text="Message" Style="{StaticResource LabelText}"/>
+                    <TextBox Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}"
+                             AcceptsReturn="True" TextWrapping="Wrap" MinHeight="120" VerticalScrollBarVisibility="Auto" Margin="0,0,0,16"/>
+
+                    <TextBlock Text="{Binding ErrorMessage}" Style="{StaticResource ErrorText}" Margin="0,0,0,8"
+                               Visibility="{Binding ErrorMessage, Converter={StaticResource NullOrEmptyToCollapsed}}"/>
+                    <TextBlock Text="{Binding StatusMessage}" Style="{StaticResource CaptionText}" Margin="0,0,0,8"
+                               Visibility="{Binding StatusMessage, Converter={StaticResource NullOrEmptyToCollapsed}}"/>
+
+                    <Button Content="Save" Command="{Binding SaveCommand}" Style="{StaticResource PrimaryButton}"
+                            HorizontalAlignment="Left" Padding="18,7"/>
+                </StackPanel>
+            </Border>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
