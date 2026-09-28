@@ -301,7 +301,7 @@ public sealed class NavigationService(IServiceProvider serviceProvider, IApiClie
         [new("published", "Published"), new("draft", "Draft")];
 
     private static readonly IReadOnlyList<FormFieldOption> SubjectTypeOptions =
-        [new("Minor", "Minor"), new("Skill", "Skill"), new("MDC", "MDC"), new("AECC", "AECC"), new("VAC", "VAC")];
+        [new("Minor", "Minor"), new("Skill", "Skill"), new("MDC", "MDC"), new("AEC", "AEC"), new("VAC", "VAC")];
 
     private static readonly IReadOnlyList<FormFieldOption> CalendarEventTypeOptions =
     [
