@@ -53,9 +53,13 @@
                      order), giving Edit/Delete a fixed leftmost column across every module. -->
                 <DataGrid x:Name="Grid" ItemsSource="{Binding PagedItems}" AutoGenerateColumns="True" IsReadOnly="True"
                           CanUserAddRows="False" CanUserDeleteRows="False" BorderThickness="0"
-                          SelectionMode="Extended" SelectionUnit="FullRow">
+                          SelectionMode="Extended" SelectionUnit="FullRow"
+                          AutoGeneratingColumn="Grid_AutoGeneratingColumn">
                     <DataGrid.Columns>
-                        <DataGridTemplateColumn Header="" Width="150" CanUserResize="False" CanUserSort="False">
+                        <!-- Auto (not a fixed px width): up to 4 action buttons (Manage/Edit/
+                             Archive-or-Delete/Restore) can appear together — a fixed width truncated
+                             and overlapped the next column whenever more than 2 were visible. -->
+                        <DataGridTemplateColumn Header="" Width="Auto" MinWidth="80" CanUserResize="False" CanUserSort="False">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" Margin="4,0">

@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using CollegeAdmin.Desktop.Export;
@@ -7,7 +8,32 @@ namespace CollegeAdmin.Desktop.Views;
 
 public partial class GenericListView : UserControl
 {
+    private static readonly Regex HumanizeRegex = new("(?<!^)([A-Z])", RegexOptions.Compiled);
+
     public GenericListView() => InitializeComponent();
+
+    /// <summary>Two readability fixes for AutoGenerateColumns' otherwise-raw column set: (1) hides
+    /// a foreign-key id column (e.g. "DepartmentId") whenever a friendlier "DepartmentName" sibling
+    /// exists on the same row — the bare number is never useful to an admin, the name is; (2) adds
+    /// spaces to PascalCase property names for the header ("DepartmentName" -> "Department Name")
+    /// instead of showing the raw C# identifier.</summary>
+    private void Grid_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
+    {
+        var propertyName = e.PropertyName;
+
+        if (propertyName != "Id" && propertyName.EndsWith("Id", StringComparison.Ordinal))
+        {
+            var namePropertyName = propertyName[..^2] + "Name";
+            var rowType = (e.PropertyDescriptor as System.ComponentModel.PropertyDescriptor)?.ComponentType;
+            if (rowType?.GetProperty(namePropertyName) is not null)
+            {
+                e.Cancel = true;
+                return;
+            }
+        }
+
+        e.Column.Header = HumanizeRegex.Replace(propertyName, " $1");
+    }
 
     /// <summary>SaveFileDialog/the write/the audit call all live in CsvExporter.ExportInteractivelyAsync
     /// (shared with TimetableView) — GenericListViewModel only ever sees the row count afterward,

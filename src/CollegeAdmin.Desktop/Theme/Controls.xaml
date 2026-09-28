@@ -195,7 +195,7 @@
         <Setter Property="CanUserResizeRows" Value="False"/>
         <Setter Property="HeadersVisibility" Value="Column"/>
         <Setter Property="SelectionMode" Value="Single"/>
-        <Setter Property="RowHeight" Value="38"/>
+        <Setter Property="RowHeight" Value="46"/>
     </Style>
 
     <Style TargetType="DataGridColumnHeader">

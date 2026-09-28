@@ -36,8 +36,44 @@ public sealed class NavigationService(IServiceProvider serviceProvider, IApiClie
     public object? CurrentPage { get; private set; }
     public event EventHandler? CurrentPageChanged;
 
+    // Department picker options, shared by every field factory that references a department (was
+    // previously a raw free-text "Department ID" numeric field everywhere — an admin had no way to
+    // know a department's id without looking it up first). Loaded once, eagerly, the first time
+    // NavigateTo runs — by the time an admin actually opens a Create/Edit dialog (a deliberate
+    // multi-click action), this cheap single GET has almost always already completed; if it
+    // somehow hasn't, FormField.HasOptions gracefully falls back to a plain text box instead of a
+    // broken empty dropdown, so there's no failure mode here, only a slower-than-ideal first open.
+    private IReadOnlyList<FormFieldOption> _departmentOptions = [];
+    private IReadOnlyList<FormFieldOption> _departmentOptionsWithBlank = [new("", "(General / not set)")];
+    private bool _departmentOptionsLoadStarted;
+
+    private void EnsureDepartmentOptionsLoading()
+    {
+        if (_departmentOptionsLoadStarted)
+        {
+            return;
+        }
+        _departmentOptionsLoadStarted = true;
+        _ = LoadDepartmentOptionsAsync();
+    }
+
+    private async Task LoadDepartmentOptionsAsync()
+    {
+        try
+        {
+            var departments = await apiClient.GetDepartmentsAsync();
+            _departmentOptions = departments.Select(d => new FormFieldOption(d.Id.ToString(), d.Name)).ToList();
+            _departmentOptionsWithBlank = [new("", "(General / not set)"), .. _departmentOptions];
+        }
+        catch (ApiRequestException)
+        {
+            // Leave the lists as they were (possibly still empty) — see this field's own remarks.
+        }
+    }
+
     public void NavigateTo(string pageKey)
     {
+        EnsureDepartmentOptionsLoading();
         CurrentPage = pageKey switch
         {
             "Dashboard" => new DashboardViewModel(apiClient, serviceProvider.GetRequiredService<Application.Auth.IAuthSessionService>()),
@@ -256,22 +292,39 @@ public sealed class NavigationService(IServiceProvider serviceProvider, IApiClie
         return options;
     }
 
+    // Small fixed-vocabulary dropdowns shared by every field factory below — no async fetch needed,
+    // these are the exact same strings the corresponding PHP controller's validate() already
+    // enforces. Previously every one of these was a free-text box the admin had to type correctly
+    // by hand (e.g. "published", "draft") with no hint of the valid values.
+    private static readonly IReadOnlyList<FormFieldOption> PublishedDraftOptions =
+        [new("published", "Published"), new("draft", "Draft")];
+
+    private static readonly IReadOnlyList<FormFieldOption> SubjectTypeOptions =
+        [new("Minor", "Minor"), new("Skill", "Skill"), new("MDC", "MDC"), new("AECC", "AECC"), new("VAC", "VAC")];
+
+    private static readonly IReadOnlyList<FormFieldOption> CalendarEventTypeOptions =
+    [
+        new("holiday", "Holiday"), new("exam", "Exam"), new("result", "Result"), new("admission", "Admission"),
+        new("academic", "Academic"), new("sports", "Sports"), new("cultural", "Cultural"),
+        new("administrative", "Administrative"), new("other", "Other"),
+    ];
+
     private static IEnumerable<FormField> PreferenceWindowFields(IReadOnlyList<FormFieldOption> programmeOptions) =>
     [
         new("academicSession", "Academic Session (e.g. 2026-27)", isRequired: true),
         new("semester", "Semester", isRequired: true),
         new("programmeId", "Programme (blank = applies to every programme)", options: programmeOptions),
-        new("subjectType", "Subject Type (Minor/Skill/MDC/AECC/VAC)", isRequired: true),
+        new("subjectType", "Subject Type", isRequired: true, options: SubjectTypeOptions),
         new("minChoices", "Minimum Choices (default 1)"),
         new("maxChoices", "Maximum Choices (default 5)"),
     ];
 
-    private static IEnumerable<FormField> SubjectFields() =>
+    private IEnumerable<FormField> SubjectFields() =>
     [
-        new("subjectType", "Subject Type (Minor/Skill/MDC/AECC/VAC)", isRequired: true),
+        new("subjectType", "Subject Type", isRequired: true, options: SubjectTypeOptions),
         new("code", "Code", isRequired: true),
         new("name", "Name", isRequired: true),
-        new("departmentId", "Department ID (optional)"),
+        new("departmentId", "Department (optional)", options: _departmentOptions),
         new("quota", "Quota (blank = uncapped)"),
     ];
 
@@ -341,12 +394,12 @@ public sealed class NavigationService(IServiceProvider serviceProvider, IApiClie
     [
         new("title", "Title", isRequired: true),
         new("description", "Description", isMultiline: true),
-        new("eventType", "Type (holiday/exam/result/admission/academic/sports/cultural/administrative/other)", isRequired: true),
+        new("eventType", "Type", isRequired: true, options: CalendarEventTypeOptions),
         new("startDate", "Start Date (YYYY-MM-DD)", isRequired: true),
         new("endDate", "End Date (YYYY-MM-DD)", isRequired: true),
         new("academicYear", "Academic Year (e.g. 2026-27)", isRequired: true),
         new("linkedEventId", "Linked Event ID (optional)"),
-        new("status", "Status (published/draft)", isRequired: true),
+        new("status", "Status", isRequired: true, options: PublishedDraftOptions),
     ];
 
     private GenericListViewModel BuildTimetableList()
@@ -640,7 +693,7 @@ public sealed class NavigationService(IServiceProvider serviceProvider, IApiClie
         // Final Convergence Phase P1-8: news.published_at is real and fillable
         // (NewsController::fillable()) but had no desktop field at all.
         new("publishedAt", "Published At (YYYY-MM-DD HH:MM:SS)"),
-        new("status", "Status (published/draft)"),
+        new("status", "Status", options: PublishedDraftOptions),
     ];
 
     private static IEnumerable<FormField> BannerFields() =>
@@ -651,7 +704,7 @@ public sealed class NavigationService(IServiceProvider serviceProvider, IApiClie
         new("mediaType", "Media Type (image/video)"),
         new("link", "Link"),
         new("sortOrder", "Sort Order"),
-        new("status", "Status (published/draft)"),
+        new("status", "Status", options: PublishedDraftOptions),
     ];
 
     private static IEnumerable<FormField> FaqFields() =>
@@ -663,7 +716,7 @@ public sealed class NavigationService(IServiceProvider serviceProvider, IApiClie
         // desktop field at all — every desktop-created FAQ silently got NULL status and default
         // ordering with no way to change either.
         new("sortOrder", "Sort Order"),
-        new("status", "Status (published/draft)"),
+        new("status", "Status", options: PublishedDraftOptions),
     ];
 
     private static IEnumerable<FormField> DocumentFields() =>
@@ -679,7 +732,7 @@ public sealed class NavigationService(IServiceProvider serviceProvider, IApiClie
         new("academicYear", "Academic Year (e.g. 2026-27)"),
     ];
 
-    private static IEnumerable<FormField> EventFields() =>
+    private IEnumerable<FormField> EventFields() =>
     [
         new("title", "Title", isRequired: true),
         new("slug", "Slug", isRequired: true),
@@ -689,22 +742,22 @@ public sealed class NavigationService(IServiceProvider serviceProvider, IApiClie
         // Final Convergence Phase P0-7: events.image is real and publicly rendered but had no
         // desktop field at all.
         new("image", "Image", uploadModule: "events"),
-        new("departmentId", "Department ID (optional)"),
+        new("departmentId", "Department (blank = general/institution-wide)", options: _departmentOptionsWithBlank),
     ];
 
-    private static IEnumerable<FormField> GalleryFields() =>
+    private IEnumerable<FormField> GalleryFields() =>
     [
         new("title", "Title", isRequired: true),
         new("slug", "Slug", isRequired: true),
         new("coverImage", "Cover Image", uploadModule: "gallery"),
-        new("departmentId", "Department ID (optional)"),
-        new("status", "Status (published/draft)"),
+        new("departmentId", "Department (blank = general/institution-wide)", options: _departmentOptionsWithBlank),
+        new("status", "Status", options: PublishedDraftOptions),
     ];
 
     private static IEnumerable<FormField> DepartmentFields() =>
     [
         new("name", "Name", isRequired: true),
-        new("status", "Status (published/draft)"),
+        new("status", "Status", options: PublishedDraftOptions),
         // Final Convergence Phase P1-2: previously unsettable through the new API/desktop at all —
         // changing a department's HOD required the legacy admin panel. Free-text by id, matching
         // this codebase's existing convention for referencing another entity in this class of form
@@ -713,15 +766,16 @@ public sealed class NavigationService(IServiceProvider serviceProvider, IApiClie
         new("hodFacultyId", "HOD Faculty ID (optional)"),
     ];
 
-    private static IEnumerable<FormField> FacultyFields() =>
+    private IEnumerable<FormField> FacultyFields() =>
     [
         new("name", "Name", isRequired: true),
         new("slug", "Slug", isRequired: true),
         new("designation", "Designation", isRequired: true),
-        new("departmentId", "Department ID (optional)"),
+        new("departmentId", "Department (optional)", options: _departmentOptionsWithBlank),
         // P2 item 5: links this row to another Faculty row (a separate row per department, same
         // person) — legacy's own multi-department mechanism, now ported to the new API/desktop.
-        // Free-text ID like departmentId above (no picker requested for that field either).
+        // Free-text ID (no picker: unlike departmentId, this references a specific PERSON, not a
+        // small fixed list — a real "pick a faculty member" search box is future scope).
         new("linkedFacultyId", "Linked Faculty ID (optional — same person, other department)"),
         new("email", "Email"),
     ];
@@ -737,19 +791,25 @@ public sealed class NavigationService(IServiceProvider serviceProvider, IApiClie
         new("isAdmissionsCommittee", "Is Admissions Committee", isCheckbox: true),
     ];
 
-    private static IEnumerable<FormField> ProgrammeFields() =>
+    private static readonly IReadOnlyList<FormFieldOption> ProgrammeLevelOptions =
     [
-        new("departmentId", "Department ID", isRequired: true),
+        new("UG", "Under-Graduate (UG)"), new("PG", "Post-Graduate (PG)"), new("Certificate", "Certificate"),
+        new("Diploma", "Diploma"), new("PhD", "Ph.D / Doctoral"),
+    ];
+
+    private IEnumerable<FormField> ProgrammeFields() =>
+    [
+        new("departmentId", "Department", isRequired: true, options: _departmentOptions),
         new("name", "Name (e.g. BCA)", isRequired: true),
         new("fullName", "Full Name (e.g. Bachelor of Computer Applications)", isRequired: true),
-        new("level", "Level (UG/PG/Certificate/Diploma/PhD)", isRequired: true),
+        new("level", "Level", isRequired: true, options: ProgrammeLevelOptions),
         new("durationYears", "Duration (Years)", isRequired: true),
         new("durationSemesters", "Duration (Semesters)", isRequired: true),
         new("seats", "Seats (optional)"),
         new("annualFee", "Annual Fee (optional)"),
         new("eligibility", "Eligibility (optional)", isMultiline: true),
         new("description", "Description (optional)", isMultiline: true),
-        new("status", "Status (published/draft)"),
+        new("status", "Status", options: PublishedDraftOptions),
     ];
 
     private static IEnumerable<FormField> AdmissionLinkFields() =>
@@ -757,7 +817,7 @@ public sealed class NavigationService(IServiceProvider serviceProvider, IApiClie
         new("title", "Title", isRequired: true),
         new("url", "URL"),
         new("filePath", "File Path"),
-        new("status", "Status (published/draft)"),
+        new("status", "Status", options: PublishedDraftOptions),
         new("sortOrder", "Sort Order"),
     ];
 
