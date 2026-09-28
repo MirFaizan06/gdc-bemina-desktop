@@ -1,3 +1,5 @@
+using CollegeAdmin.Application.Auth;
+using CollegeAdmin.Contracts.Api;
 using CollegeAdmin.Desktop.Theming;
 using CollegeAdmin.Infrastructure.Api;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -20,15 +22,22 @@ public sealed partial class SettingsViewModel : ObservableObject
     private readonly IApiClient _apiClient;
     private readonly ThemeService _themeService;
 
-    public SettingsViewModel(IApiClient apiClient, IConfiguration configuration, ThemeService themeService)
+    public SettingsViewModel(IApiClient apiClient, IConfiguration configuration, ThemeService themeService, IAuthSessionService authSessionService)
     {
         _apiClient = apiClient;
         _themeService = themeService;
         ApiBaseUrl = configuration["Api:BaseUrl"] ?? "(not configured)";
         AppVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.0.0";
+        // Convenience only, matching ShellViewModel's own nav-hiding philosophy — the real
+        // enforcement is server-side (BackupsController's raw role check). Hiding the section here
+        // just stops a non-Super-Admin from seeing a button they'd be 403'd on anyway.
+        IsSuperAdmin = authSessionService.CurrentAdmin?.Role == "super_admin";
         RefreshThemeDisplay();
         _ = LoadAsync();
     }
+
+    [ObservableProperty]
+    private bool _isSuperAdmin;
 
     [ObservableProperty]
     private string _currentThemeName = "";
@@ -75,6 +84,53 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty]
     private DateTime? _lastSuccessfulCheckAt;
+
+    // ─── Backup (download-only — see FINAL_COMPLETION_TRACKER.md; restore is a deliberately
+    // separate, not-yet-built feature) ───────────────────────────────────────────────────────────
+
+    [ObservableProperty]
+    private bool _isGeneratingBackup;
+
+    [ObservableProperty]
+    private string? _backupStatusMessage;
+
+    [ObservableProperty]
+    private string? _backupErrorMessage;
+
+    /// <summary>The actual SaveFileDialog/disk-write is a View-layer concern handled by
+    /// SettingsView's code-behind (matching ExportButton_Click's own established split) — this just
+    /// does the two API calls and keeps the bindable status text current while they run.</summary>
+    public async Task<(BackupGeneratedResult Meta, byte[] Bytes)?> GenerateAndFetchBackupAsync()
+    {
+        IsGeneratingBackup = true;
+        BackupErrorMessage = null;
+        BackupStatusMessage = "Generating backup on the server...";
+        try
+        {
+            var meta = await _apiClient.GenerateBackupAsync();
+            BackupStatusMessage = $"Backup ready ({meta.ModuleCount} modules, {meta.FileCount} files, {FormatSize(meta.SizeBytes)}). Downloading...";
+            var bytes = await _apiClient.DownloadBackupAsync(meta.Token);
+            BackupStatusMessage = "Backup downloaded. Choose where to save it.";
+            return (meta, bytes);
+        }
+        catch (ApiRequestException ex)
+        {
+            BackupErrorMessage = ex.Message;
+            BackupStatusMessage = null;
+            return null;
+        }
+        finally
+        {
+            IsGeneratingBackup = false;
+        }
+    }
+
+    private static string FormatSize(long bytes) => bytes switch
+    {
+        >= 1024 * 1024 => $"{bytes / (1024.0 * 1024.0):F1} MB",
+        >= 1024 => $"{bytes / 1024.0:F1} KB",
+        _ => $"{bytes} B",
+    };
 
     [RelayCommand]
     private async Task LoadAsync()

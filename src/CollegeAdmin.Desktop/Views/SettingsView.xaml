@@ -116,6 +116,39 @@
                     </StackPanel>
                 </Border>
 
+                <!-- ═══════════════════════════ DATABASE BACKUP ═══════════════════════════ -->
+                <!-- Super-Admin-only, server-enforced (BackupsController's raw role check) — this
+                     Visibility binding is convenience only, matching every other nav/section gate in
+                     this app (see ShellViewModel's own remarks): it just keeps a button a non-Super-
+                     Admin would be 403'd on out of their way, not the real security boundary.
+                     Download-only for now — restore is a deliberately separate, not-yet-built
+                     feature that will only ever ADD data matching the server 100%, never replace. -->
+                <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="1" CornerRadius="12" Padding="24" Margin="0,0,0,16"
+                        Visibility="{Binding IsSuperAdmin, Converter={StaticResource BoolToVisibility}}">
+                    <StackPanel>
+                        <DockPanel LastChildFill="False" Margin="0,0,0,16">
+                            <Border DockPanel.Dock="Left" Width="38" Height="38" CornerRadius="10"
+                                    Background="{StaticResource AccentTealBgBrush}" Margin="0,0,12,0">
+                                <TextBlock Text="&#128190;" FontSize="17" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel DockPanel.Dock="Left" VerticalAlignment="Center">
+                                <TextBlock Text="Database Backup" Style="{StaticResource SectionTitleText}" FontSize="15"/>
+                                <TextBlock Text="Super Admin only. Downloads a full snapshot as a ZIP of Excel files, one folder per module."
+                                           Style="{StaticResource CaptionText}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </DockPanel>
+
+                        <Button x:Name="GenerateBackupButton" Content="Generate &amp; Download Backup" Style="{StaticResource PrimaryButton}"
+                                HorizontalAlignment="Left" Padding="16,8" Click="GenerateBackupButton_Click"/>
+
+                        <TextBlock Text="{Binding BackupStatusMessage}" Style="{StaticResource CaptionText}" Margin="0,10,0,0"
+                                   TextWrapping="Wrap" Visibility="{Binding BackupStatusMessage, Converter={StaticResource NullOrEmptyToCollapsed}}"/>
+                        <TextBlock Text="{Binding BackupErrorMessage}" Style="{StaticResource ErrorText}" Margin="0,10,0,0"
+                                   Visibility="{Binding BackupErrorMessage, Converter={StaticResource NullOrEmptyToCollapsed}}"/>
+                    </StackPanel>
+                </Border>
+
                 <!-- ═══════════════════════════ CREDITS ═══════════════════════════ -->
                 <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
                         BorderThickness="1" CornerRadius="12" Padding="24">

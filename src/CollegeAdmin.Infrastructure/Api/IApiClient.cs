@@ -291,4 +291,18 @@ public interface IApiClient
     Task<IReadOnlyList<AdmissionLinkDto>> GetAdmissionLinksAsync(CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<AdmissionBannerDto>> GetAdmissionBannersAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>Super-Admin-only (server-enforced — see BackupsController's raw role check, the same
+    /// pattern SecurityController::flushCache() uses). Generates a new database backup ZIP
+    /// server-side and returns its metadata; call DownloadBackupAsync with the returned Token to
+    /// fetch the actual bytes. Download-only — restore is a deliberately separate, not-yet-built
+    /// feature (see docs/claude/FINAL_COMPLETION_TRACKER.md).</summary>
+    Task<BackupGeneratedResult> GenerateBackupAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>Raw ZIP bytes for a token returned by GenerateBackupAsync or GetRecentBackupsAsync —
+    /// the caller (View-layer) handles saving it to disk, matching ExportUniversityRrAsync's own
+    /// file-handling split.</summary>
+    Task<byte[]> DownloadBackupAsync(string token, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<BackupSummaryDto>> GetRecentBackupsAsync(CancellationToken cancellationToken = default);
 }

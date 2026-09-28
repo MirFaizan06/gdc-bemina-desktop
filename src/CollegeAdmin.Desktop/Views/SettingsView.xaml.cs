@@ -1,8 +1,10 @@
 using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using CollegeAdmin.Desktop.Theming;
 using CollegeAdmin.Desktop.ViewModels;
+using Microsoft.Win32;
 
 namespace CollegeAdmin.Desktop.Views;
 
@@ -54,6 +56,45 @@ public partial class SettingsView : UserControl
                 Process.Start(exePath);
             }
             System.Windows.Application.Current.Shutdown();
+        }
+    }
+
+    /// <summary>Same "ViewModel does the API calls, code-behind owns the SaveFileDialog" split as
+    /// UniversityRrExportWindow's own export button — the button is disabled imperatively around
+    /// the await rather than via a binding, since this is a plain Click handler, not a RelayCommand
+    /// with its own CanExecute.</summary>
+    private async void GenerateBackupButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not SettingsViewModel viewModel)
+        {
+            return;
+        }
+
+        GenerateBackupButton.IsEnabled = false;
+        try
+        {
+            var result = await viewModel.GenerateAndFetchBackupAsync();
+            if (result is null)
+            {
+                // ViewModel already set BackupErrorMessage for the bound error text — nothing more to do.
+                return;
+            }
+
+            var (meta, bytes) = result.Value;
+            var dialog = new SaveFileDialog { FileName = meta.Filename, Filter = "Zip Archive (*.zip)|*.zip" };
+            if (dialog.ShowDialog() == true)
+            {
+                await File.WriteAllBytesAsync(dialog.FileName, bytes);
+                MessageBox.Show(
+                    $"Backup saved to {dialog.FileName}.",
+                    "Backup Complete",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+        }
+        finally
+        {
+            GenerateBackupButton.IsEnabled = true;
         }
     }
 }

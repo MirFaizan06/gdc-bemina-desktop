@@ -234,7 +234,28 @@ public class XamlLoadsTests
             var view = new SettingsView
             {
                 DataContext = new CollegeAdmin.Desktop.ViewModels.SettingsViewModel(
-                    new FakeApiClient(), configuration, new ThemeService()),
+                    new FakeApiClient(), configuration, new ThemeService(), new FakeAuthSessionService()),
+            };
+            _ = view;
+        });
+    }
+
+    /// <summary>The Database Backup section only renders when IsSuperAdmin is true — the plain
+    /// SettingsView test above (a null CurrentAdmin) never exercises that path.</summary>
+    [Fact]
+    public void SettingsView_AsSuperAdmin_LoadsWithoutAResourceResolutionError()
+    {
+        RunOnStaThread(() =>
+        {
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?> { ["Api:BaseUrl"] = "http://localhost/api/v1/" })
+                .Build();
+            var auth = new FakeAuthSessionService();
+            auth.LoginAsync("super@test.local", "x").GetAwaiter().GetResult();
+            var view = new SettingsView
+            {
+                DataContext = new CollegeAdmin.Desktop.ViewModels.SettingsViewModel(
+                    new FakeApiClient(), configuration, new ThemeService(), auth),
             };
             _ = view;
         });

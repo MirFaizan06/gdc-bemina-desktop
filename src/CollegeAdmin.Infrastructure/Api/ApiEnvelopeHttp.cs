@@ -38,6 +38,53 @@ internal static class ApiEnvelopeHttp
             return client.SendAsync(request, cancellationToken);
         }), cancellationToken);
 
+    /// <summary>For the one class of endpoint that deliberately breaks out of the JSON envelope
+    /// contract (see UniversityRrController's own precedent comment on why base64-in-JSON was
+    /// chosen there for a SMALL file) — a raw byte stream (e.g. a generated backup ZIP, potentially
+    /// much larger than an RR export). Success still means "200 with a body"; failure still means
+    /// "the server returned the normal ApiEnvelope error shape", so the error path stays consistent
+    /// with every other call even though the success path isn't a TData at all.</summary>
+    public static async Task<byte[]> GetBytesAsync(HttpClient client, string relativeUrl, CancellationToken cancellationToken)
+    {
+        HttpResponseMessage response;
+        try
+        {
+            response = await client.GetAsync(relativeUrl, cancellationToken);
+        }
+        catch (HttpRequestException ex)
+        {
+            throw new ApiRequestException("NETWORK_ERROR", "Could not reach the server. Check your connection.", retryable: true, ex);
+        }
+        catch (TaskCanceledException ex) when (!cancellationToken.IsCancellationRequested)
+        {
+            throw new ApiRequestException("TIMEOUT", "The request timed out.", retryable: true, ex);
+        }
+
+        using (response)
+        {
+            if (!response.IsSuccessStatusCode)
+            {
+                ApiEnvelope<object>? errorEnvelope = null;
+                try
+                {
+                    errorEnvelope = await response.Content.ReadFromJsonAsync<ApiEnvelope<object>>(JsonOptions, cancellationToken);
+                }
+                catch (JsonException)
+                {
+                    // Fall through to the generic error below — the body wasn't a JSON envelope at all.
+                }
+
+                throw new ApiRequestException(errorEnvelope?.Error ?? new ApiErrorPayload
+                {
+                    Code = "UNKNOWN_ERROR",
+                    Message = $"The server returned an error (HTTP {(int)response.StatusCode}) with no details.",
+                });
+            }
+
+            return await response.Content.ReadAsByteArrayAsync(cancellationToken);
+        }
+    }
+
     public static async Task<TData> PostAsync<TData>(HttpClient client, string relativeUrl, object? body, CancellationToken cancellationToken, Action<HttpRequestMessage>? configureRequest = null)
     {
         var (data, _) = await SendAsync<TData>(cancellationToken, () =>

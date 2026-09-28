@@ -184,4 +184,63 @@ public class ApiClientTests
         Assert.Single(result);
         Assert.Single(handler.RequestedUrls);
     }
+
+    [Fact]
+    public async Task GenerateBackupAsync_ParsesTheGeneratedMetadata()
+    {
+        const string body = """
+            {"success":true,"data":{"token":"a1b2c3","filename":"backup-2026-09-28.zip","sizeBytes":204800,"moduleCount":29,"fileCount":41,"generatedAt":"2026-09-28T12:00:00Z"},"meta":{},"correlationId":"x"}
+            """;
+        var client = BuildClient(HttpStatusCode.OK, body);
+
+        var result = await client.GenerateBackupAsync();
+
+        Assert.Equal("a1b2c3", result.Token);
+        Assert.Equal("backup-2026-09-28.zip", result.Filename);
+        Assert.Equal(204800, result.SizeBytes);
+        Assert.Equal(29, result.ModuleCount);
+        Assert.Equal(41, result.FileCount);
+    }
+
+    /// <summary>DownloadBackupAsync deliberately breaks out of the JSON envelope contract (see
+    /// ApiEnvelopeHttp.GetBytesAsync's own remarks) — this proves the raw bytes travel through
+    /// unmodified, not wrapped/decoded as if they were an envelope.</summary>
+    [Fact]
+    public async Task DownloadBackupAsync_ReturnsTheRawZipBytes()
+    {
+        var handler = new FakeHttpMessageHandler(HttpStatusCode.OK, "PK\u0003\u0004-fake-zip-bytes-");
+        var httpClient = new HttpClient(handler) { BaseAddress = new Uri("http://localhost/api/v1/") };
+        var client = new ApiClient(httpClient);
+
+        var bytes = await client.DownloadBackupAsync("a1b2c3");
+
+        Assert.Equal("PK\u0003\u0004-fake-zip-bytes-", System.Text.Encoding.UTF8.GetString(bytes));
+    }
+
+    [Fact]
+    public async Task DownloadBackupAsync_OnUnknownToken_ThrowsApiRequestException_WithTheServersErrorEnvelope()
+    {
+        const string errorBody = """{"success":false,"error":{"code":"NOT_FOUND","message":"Backup not found or has expired.","details":null,"fieldErrors":null,"retryable":false,"correlationId":"x"}}""";
+        var client = BuildClient(HttpStatusCode.NotFound, errorBody);
+
+        var ex = await Assert.ThrowsAsync<ApiRequestException>(() => client.DownloadBackupAsync("does-not-exist"));
+
+        Assert.Equal("NOT_FOUND", ex.Code);
+        Assert.Equal("Backup not found or has expired.", ex.Message);
+    }
+
+    [Fact]
+    public async Task GetRecentBackupsAsync_ParsesTheHistoryList()
+    {
+        const string body = """
+            {"success":true,"data":{"backups":[{"token":"a1b2c3","filename":"backup-2026-09-28.zip","sizeBytes":204800,"generatedAt":"2026-09-28T12:00:00Z","status":"finished"}]},"meta":{},"correlationId":"x"}
+            """;
+        var client = BuildClient(HttpStatusCode.OK, body);
+
+        var result = await client.GetRecentBackupsAsync();
+
+        Assert.Single(result);
+        Assert.Equal("a1b2c3", result[0].Token);
+        Assert.Equal("finished", result[0].Status);
+    }
 }

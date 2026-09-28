@@ -208,6 +208,31 @@ internal sealed class FakeApiClient : IApiClient
         return Task.FromResult(UniversityRrExportResultToReturn);
     }
 
+    public BackupGeneratedResult BackupGeneratedResultToReturn { get; set; } = new() { Token = "test-token", Filename = "backup.zip", SizeBytes = 1024, ModuleCount = 1, FileCount = 1, GeneratedAt = "2026-09-28T00:00:00Z" };
+    public byte[] BackupBytesToReturn { get; set; } = [1, 2, 3];
+    public IReadOnlyList<BackupSummaryDto> RecentBackupsToReturn { get; set; } = [];
+    public Exception? ThrowOnBackup { get; set; }
+    public string? LastDownloadedBackupToken { get; private set; }
+
+    public Task<BackupGeneratedResult> GenerateBackupAsync(CancellationToken cancellationToken = default)
+    {
+        if (ThrowOnBackup is not null) throw ThrowOnBackup;
+        return Task.FromResult(BackupGeneratedResultToReturn);
+    }
+
+    public Task<byte[]> DownloadBackupAsync(string token, CancellationToken cancellationToken = default)
+    {
+        if (ThrowOnBackup is not null) throw ThrowOnBackup;
+        LastDownloadedBackupToken = token;
+        return Task.FromResult(BackupBytesToReturn);
+    }
+
+    public Task<IReadOnlyList<BackupSummaryDto>> GetRecentBackupsAsync(CancellationToken cancellationToken = default)
+    {
+        if (ThrowOnBackup is not null) throw ThrowOnBackup;
+        return Task.FromResult(RecentBackupsToReturn);
+    }
+
     public string? LastExportedModule { get; private set; }
     public int? LastExportedRowCount { get; private set; }
 

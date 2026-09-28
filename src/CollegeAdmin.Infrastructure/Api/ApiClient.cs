@@ -691,4 +691,16 @@ public sealed class ApiClient(HttpClient httpClient) : IApiClient
         var result = await ApiEnvelopeHttp.GetAsync<AdmissionBannersListResult>(httpClient, "admission-banners", cancellationToken);
         return result.AdmissionBanners;
     }
+
+    public Task<BackupGeneratedResult> GenerateBackupAsync(CancellationToken cancellationToken = default) =>
+        ApiEnvelopeHttp.PostAsync<BackupGeneratedResult>(httpClient, "backups", body: null, cancellationToken);
+
+    public Task<byte[]> DownloadBackupAsync(string token, CancellationToken cancellationToken = default) =>
+        ApiEnvelopeHttp.GetBytesAsync(httpClient, $"backups/{Uri.EscapeDataString(token)}/download", cancellationToken);
+
+    public async Task<IReadOnlyList<BackupSummaryDto>> GetRecentBackupsAsync(CancellationToken cancellationToken = default)
+    {
+        var result = await ApiEnvelopeHttp.GetAsync<BackupsListResult>(httpClient, "backups", cancellationToken);
+        return result.Backups;
+    }
 }
