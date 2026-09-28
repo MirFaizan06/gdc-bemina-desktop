@@ -1,0 +1,185 @@
+<UserControl x:Class="CollegeAdmin.Desktop.Views.HelpView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d">
+    <!-- Help & Documentation — entirely local content (see Help/HelpCatalog.cs), split into a
+         "General" view and per-role scoped views via the chip row below. Every color/font here is a
+         {StaticResource} from Theme/*.xaml, never a hardcoded literal, so the page automatically
+         matches whichever theme preset (Indigo Night / Emerald Fresh / Slate Professional) is
+         currently active — per the "ensure it also takes theme system" instruction. -->
+    <UserControl.Resources>
+        <!-- Local to this page: a pill-shaped filter chip whose selected look is driven by the bound
+             RoleFilterChip.IsSelected (a per-item DataTrigger, not a routed Button trigger — no
+             Freezable/Setter-ordering pitfall here since every Setter targets the templated root). -->
+        <Style x:Key="RoleChipButton" TargetType="Button">
+            <Setter Property="FontFamily" Value="{StaticResource AppFont}"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="Margin" Value="0,0,8,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="{StaticResource PageBgBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="18">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                    <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Numbered step badge + text row, used inside every expanded topic card. -->
+        <Style x:Key="StepNumberBadge" TargetType="Border">
+            <Setter Property="Width" Value="22"/>
+            <Setter Property="Height" Value="22"/>
+            <Setter Property="CornerRadius" Value="11"/>
+            <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="Margin" Value="0,1,10,0"/>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer>
+        <StackPanel Margin="4" MaxWidth="880" HorizontalAlignment="Left">
+            <TextBlock Text="Help &amp; Documentation" Style="{StaticResource PageTitleText}" Margin="0,0,0,4"/>
+            <TextBlock Text="A point-by-point guide to every part of the app — General topics apply to everyone; pick a role below for guidance scoped to it."
+                       Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="0,0,0,18"/>
+
+            <TextBlock Text="Search" Style="{StaticResource LabelText}"/>
+            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged, Delay=200}"
+                     Padding="12,9" Margin="0,0,0,14" MaxWidth="380" HorizontalAlignment="Left"
+                     AutomationProperties.AutomationId="HelpSearchBox"/>
+
+            <ItemsControl ItemsSource="{Binding RoleChips}" Margin="0,0,0,10">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button Content="{Binding Label}" Style="{StaticResource RoleChipButton}"
+                                Command="{Binding DataContext.SelectRoleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                CommandParameter="{Binding Id}"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <ItemsControl ItemsSource="{Binding Groups}" Margin="0,10,0,0">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Margin="0,0,0,22">
+                            <TextBlock Text="{Binding Category}" Style="{StaticResource SectionTitleText}" FontSize="14"
+                                       Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,10"/>
+
+                            <ItemsControl ItemsSource="{Binding Topics}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
+                                                BorderThickness="1" CornerRadius="12" Margin="0,0,0,10">
+                                            <StackPanel>
+                                                <Button Command="{Binding ToggleCommand}" Cursor="Hand" Padding="0">
+                                                    <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border Background="Transparent" Padding="18,16">
+                                                                <ContentPresenter/>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                    <DockPanel LastChildFill="True">
+                                                        <Border DockPanel.Dock="Left" Width="38" Height="38" CornerRadius="10"
+                                                                Background="{StaticResource PrimaryLightBrush}" Margin="0,0,14,0">
+                                                            <TextBlock Text="{Binding Topic.Icon}" FontSize="17"
+                                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                        <TextBlock DockPanel.Dock="Right" VerticalAlignment="Center" FontSize="12"
+                                                                    Foreground="{StaticResource TextMutedBrush}" Margin="10,0,0,0">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Text" Value="&#9662;"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsExpanded}" Value="True">
+                                                                            <Setter Property="Text" Value="&#9652;"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                        <StackPanel VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding Topic.Title}" Style="{StaticResource BodyText}"
+                                                                       FontWeight="SemiBold" FontSize="14"/>
+                                                            <TextBlock Text="{Binding Topic.Summary}" Style="{StaticResource CaptionText}"
+                                                                       TextWrapping="Wrap" Margin="0,2,0,0"/>
+                                                        </StackPanel>
+                                                    </DockPanel>
+                                                </Button>
+
+                                                <Border Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVisibility}}"
+                                                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
+                                                        Padding="18,16,18,18">
+                                                    <StackPanel>
+                                                        <ItemsControl ItemsSource="{Binding NumberedSteps}">
+                                                            <ItemsControl.ItemTemplate>
+                                                                <DataTemplate>
+                                                                    <DockPanel Margin="0,0,0,10" LastChildFill="True">
+                                                                        <Border DockPanel.Dock="Left" Style="{StaticResource StepNumberBadge}">
+                                                                            <TextBlock Text="{Binding Number}" Foreground="White" FontSize="11"
+                                                                                       FontWeight="Bold" HorizontalAlignment="Center"
+                                                                                       VerticalAlignment="Center"/>
+                                                                        </Border>
+                                                                        <TextBlock Text="{Binding Text}" Style="{StaticResource BodyText}"
+                                                                                   TextWrapping="Wrap"/>
+                                                                    </DockPanel>
+                                                                </DataTemplate>
+                                                            </ItemsControl.ItemTemplate>
+                                                        </ItemsControl>
+
+                                                        <Border Background="{StaticResource AccentAmberBgBrush}" CornerRadius="8" Padding="12"
+                                                                Margin="0,4,0,0"
+                                                                Visibility="{Binding Topic.Tips, Converter={StaticResource NotNullToVisibility}}">
+                                                            <StackPanel>
+                                                                <TextBlock Text="&#128161; Tip" FontWeight="SemiBold" FontSize="12"
+                                                                           Foreground="{StaticResource WarningBrush}" Margin="0,0,0,4"/>
+                                                                <ItemsControl ItemsSource="{Binding Topic.Tips}">
+                                                                    <ItemsControl.ItemTemplate>
+                                                                        <DataTemplate>
+                                                                            <TextBlock Text="{Binding}" Style="{StaticResource CaptionText}"
+                                                                                       Foreground="{StaticResource TextPrimaryBrush}" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                                                                        </DataTemplate>
+                                                                    </ItemsControl.ItemTemplate>
+                                                                </ItemsControl>
+                                                            </StackPanel>
+                                                        </Border>
+                                                    </StackPanel>
+                                                </Border>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TextBlock Text="No topics match your search in this role's view — try General, another role, or a different search term."
+                       Style="{StaticResource CaptionText}" TextWrapping="Wrap" Margin="0,10,0,30"
+                       Visibility="{Binding HasResults, Converter={StaticResource InverseBoolToVisibility}}"/>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -49,7 +49,7 @@ public class ShellViewModelTests
         Assert.Single(nav.NavigatedKeys);
         Assert.Equal("Dashboard", nav.NavigatedKeys[0]);
         Assert.Contains("Test", viewModel.WelcomeMessage); // time-based greeting + first name, e.g. "Good morning, Test"
-        Assert.Equal(18, viewModel.NavItems.Count); // +1 for the new "PYQ" item (P1-10/§2b)
+        Assert.Equal(19, viewModel.NavItems.Count); // +1 for the new "Help & Docs" item
     }
 
     [Fact]

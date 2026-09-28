@@ -1,0 +1,7 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Segoe UI Variable Text ships with Windows 11; WPF's comma-separated fallback list quietly
+         drops to Segoe UI (present on every supported Windows version) when it isn't found, so
+         this is safe on an "ordinary Windows PC" per CLAUDE.md even if it's Windows 10. -->
+    <FontFamily x:Key="AppFont">Segoe UI Variable Text, Segoe UI</FontFamily>
+</ResourceDictionary>

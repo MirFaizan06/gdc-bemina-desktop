@@ -78,6 +78,7 @@ public sealed class NavigationService(IServiceProvider serviceProvider, IApiClie
         {
             "Dashboard" => new DashboardViewModel(apiClient, serviceProvider.GetRequiredService<Application.Auth.IAuthSessionService>()),
             "Settings" => serviceProvider.GetRequiredService<SettingsViewModel>(),
+            "Help & Docs" => serviceProvider.GetRequiredService<HelpViewModel>(),
             "Website Content" => BuildWebsiteContentTabs(),
             "College Structure" => BuildCollegeStructureTabs(),
             "Administration" => serviceProvider.GetRequiredService<AdminsListViewModel>(),

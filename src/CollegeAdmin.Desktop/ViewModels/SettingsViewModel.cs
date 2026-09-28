@@ -1,3 +1,4 @@
+using CollegeAdmin.Desktop.Theming;
 using CollegeAdmin.Infrastructure.Api;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -17,13 +18,32 @@ namespace CollegeAdmin.Desktop.ViewModels;
 public sealed partial class SettingsViewModel : ObservableObject
 {
     private readonly IApiClient _apiClient;
+    private readonly ThemeService _themeService;
 
-    public SettingsViewModel(IApiClient apiClient, IConfiguration configuration)
+    public SettingsViewModel(IApiClient apiClient, IConfiguration configuration, ThemeService themeService)
     {
         _apiClient = apiClient;
+        _themeService = themeService;
         ApiBaseUrl = configuration["Api:BaseUrl"] ?? "(not configured)";
         AppVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.0.0";
+        RefreshThemeDisplay();
         _ = LoadAsync();
+    }
+
+    [ObservableProperty]
+    private string _currentThemeName = "";
+
+    [ObservableProperty]
+    private string _currentThemePrimaryHex = "#6366F1";
+
+    /// <summary>Re-reads the saved theme preference — called on construction and again by
+    /// SettingsView's code-behind after the user picks a different theme, since that save happens
+    /// entirely outside this ViewModel (ThemeChooserWindow is a plain Window, not MVVM-bound).</summary>
+    public void RefreshThemeDisplay()
+    {
+        var preset = _themeService.LoadPreset();
+        CurrentThemeName = preset.Name;
+        CurrentThemePrimaryHex = preset.PrimaryHex;
     }
 
     [ObservableProperty]

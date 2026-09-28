@@ -8,56 +8,127 @@
     <!-- Final Convergence Phase P1-15: "System" renamed to "Settings" — Credits (CLAUDE.md's own
          developer-credit requirement) is now one section of this screen, alongside connectivity
          status (a live ping, not a cached assumption), the running app version, and basic
-         diagnostics (API base URL, last successful request time). -->
+         diagnostics (API base URL, last successful request time). Appearance (theme presets) is a
+         local-only, device-scoped preference — see Theming/ThemeService.cs — deliberately not a
+         server-tracked setting, so it lives here in code-behind rather than SettingsViewModel. -->
     <Grid>
         <shared:LoadingView Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}"/>
         <shared:ErrorStateView Message="{Binding ErrorMessage}" RetryCommand="{Binding LoadCommand}"
                                 Visibility="{Binding ErrorMessage, Converter={StaticResource NullOrEmptyToCollapsed}}"/>
 
         <ScrollViewer Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibility}}">
-            <StackPanel Margin="4" MaxWidth="520" HorizontalAlignment="Left">
-                <TextBlock Text="Settings" Style="{StaticResource SectionTitleText}" Margin="0,0,0,16"/>
+            <StackPanel Margin="4" MaxWidth="620" HorizontalAlignment="Left">
+                <TextBlock Text="Settings" Style="{StaticResource PageTitleText}" Margin="0,0,0,4"/>
+                <TextBlock Text="App preferences, connectivity, diagnostics, and credits." Style="{StaticResource CaptionText}" Margin="0,0,0,20"/>
 
+                <!-- ═══════════════════════════ APPEARANCE ═══════════════════════════ -->
                 <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
-                        BorderThickness="1" CornerRadius="10" Padding="24" Margin="0,0,0,16">
+                        BorderThickness="1" CornerRadius="12" Padding="24" Margin="0,0,0,16">
                     <StackPanel>
-                        <TextBlock Text="CONNECTIVITY" Style="{StaticResource CaptionText}" Margin="0,0,0,8"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                            <TextBlock Text="Status: " Style="{StaticResource BodyText}"/>
-                            <TextBlock Text="Connected" Foreground="Green" FontWeight="SemiBold"
-                                       Visibility="{Binding IsConnected, Converter={StaticResource BoolToVisibility}}"/>
-                            <TextBlock Text="Not Connected" Foreground="Red" FontWeight="SemiBold"
-                                       Visibility="{Binding IsConnected, Converter={StaticResource InverseBoolToVisibility}}"/>
+                        <DockPanel LastChildFill="False" Margin="0,0,0,16">
+                            <Border DockPanel.Dock="Left" Width="38" Height="38" CornerRadius="10"
+                                    Background="{StaticResource AccentVioletBgBrush}" Margin="0,0,12,0">
+                                <TextBlock Text="&#127912;" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel DockPanel.Dock="Left" VerticalAlignment="Center">
+                                <TextBlock Text="Appearance" Style="{StaticResource SectionTitleText}" FontSize="15"/>
+                                <TextBlock Text="A device-only preference — never synced to the server." Style="{StaticResource CaptionText}"/>
+                            </StackPanel>
+                        </DockPanel>
+
+                        <Border Background="{StaticResource PageBgBrush}" CornerRadius="10" Padding="16">
+                            <DockPanel LastChildFill="False">
+                                <Border DockPanel.Dock="Left" Width="34" Height="34" CornerRadius="17"
+                                        Background="{Binding CurrentThemePrimaryHex}" Margin="0,0,12,0"/>
+                                <StackPanel DockPanel.Dock="Left" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding CurrentThemeName}" Style="{StaticResource BodyText}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="Current theme" Style="{StaticResource CaptionText}"/>
+                                </StackPanel>
+                                <Button DockPanel.Dock="Right" Content="Change Theme..." Style="{StaticResource PrimaryButton}"
+                                        Padding="16,8" VerticalAlignment="Center" Click="ChangeThemeButton_Click"/>
+                            </DockPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- ═══════════════════════════ CONNECTIVITY ═══════════════════════════ -->
+                <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="1" CornerRadius="12" Padding="24" Margin="0,0,0,16">
+                    <StackPanel>
+                        <DockPanel LastChildFill="False" Margin="0,0,0,16">
+                            <Border DockPanel.Dock="Left" Width="38" Height="38" CornerRadius="10"
+                                    Background="{StaticResource AccentSkyBgBrush}" Margin="0,0,12,0">
+                                <TextBlock Text="&#128225;" FontSize="17" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <TextBlock DockPanel.Dock="Left" Text="Connectivity" Style="{StaticResource SectionTitleText}"
+                                       FontSize="15" VerticalAlignment="Center"/>
+                        </DockPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                            <Border CornerRadius="12" Padding="10,3" Margin="0,0,10,0"
+                                    Background="{StaticResource SuccessBgBrush}"
+                                    Visibility="{Binding IsConnected, Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock Text="● Connected" Foreground="{StaticResource SuccessBrush}" FontWeight="SemiBold" FontSize="12"/>
+                            </Border>
+                            <Border CornerRadius="12" Padding="10,3" Margin="0,0,10,0"
+                                    Background="{StaticResource DangerBgBrush}"
+                                    Visibility="{Binding IsConnected, Converter={StaticResource InverseBoolToVisibility}}">
+                                <TextBlock Text="● Not Connected" Foreground="{StaticResource DangerBrush}" FontWeight="SemiBold" FontSize="12"/>
+                            </Border>
                         </StackPanel>
-                        <TextBlock Style="{StaticResource CaptionText}" Margin="0,0,0,4"
+                        <TextBlock Style="{StaticResource CaptionText}" Margin="0,0,0,12"
                                    Visibility="{Binding LastSuccessfulCheckAt, Converter={StaticResource NotNullToVisibility}}">
                             <Run Text="Last successful check: "/>
                             <Run Text="{Binding LastSuccessfulCheckAt}"/>
                         </TextBlock>
-                        <Button Content="Check Connectivity Now" HorizontalAlignment="Left" Margin="0,8,0,0"
+                        <Button Content="Check Connectivity Now" HorizontalAlignment="Left" Padding="14,7"
                                 Command="{Binding CheckConnectivityCommand}"/>
                     </StackPanel>
                 </Border>
 
+                <!-- ═══════════════════════════ DIAGNOSTICS ═══════════════════════════ -->
                 <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
-                        BorderThickness="1" CornerRadius="10" Padding="24" Margin="0,0,0,16">
+                        BorderThickness="1" CornerRadius="12" Padding="24" Margin="0,0,0,16">
                     <StackPanel>
-                        <TextBlock Text="DIAGNOSTICS" Style="{StaticResource CaptionText}" Margin="0,0,0,8"/>
-                        <TextBlock Style="{StaticResource BodyText}" Margin="0,0,0,4">
-                            <Run Text="App version: "/>
-                            <Run Text="{Binding AppVersion}" FontWeight="SemiBold"/>
-                        </TextBlock>
-                        <TextBlock Style="{StaticResource BodyText}" TextWrapping="Wrap">
-                            <Run Text="API base URL: "/>
-                            <Run Text="{Binding ApiBaseUrl}" FontWeight="SemiBold"/>
-                        </TextBlock>
+                        <DockPanel LastChildFill="False" Margin="0,0,0,16">
+                            <Border DockPanel.Dock="Left" Width="38" Height="38" CornerRadius="10"
+                                    Background="{StaticResource AccentAmberBgBrush}" Margin="0,0,12,0">
+                                <TextBlock Text="&#128295;" FontSize="17" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <TextBlock DockPanel.Dock="Left" Text="Diagnostics" Style="{StaticResource SectionTitleText}"
+                                       FontSize="15" VerticalAlignment="Center"/>
+                        </DockPanel>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" MinWidth="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="App version" Style="{StaticResource CaptionText}" Margin="0,0,0,4"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding AppVersion}" Style="{StaticResource BodyText}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="API base URL" Style="{StaticResource CaptionText}"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ApiBaseUrl}" Style="{StaticResource BodyText}" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                        </Grid>
                     </StackPanel>
                 </Border>
 
+                <!-- ═══════════════════════════ CREDITS ═══════════════════════════ -->
                 <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
-                        BorderThickness="1" CornerRadius="10" Padding="24">
+                        BorderThickness="1" CornerRadius="12" Padding="24">
                     <StackPanel>
-                        <TextBlock Text="CREDITS" Style="{StaticResource CaptionText}" Margin="0,0,0,8"/>
+                        <DockPanel LastChildFill="False" Margin="0,0,0,16">
+                            <Border DockPanel.Dock="Left" Width="38" Height="38" CornerRadius="10"
+                                    Background="{StaticResource AccentRoseBgBrush}" Margin="0,0,12,0">
+                                <TextBlock Text="&#128081;" FontSize="17" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <TextBlock DockPanel.Dock="Left" Text="Credits" Style="{StaticResource SectionTitleText}"
+                                       FontSize="15" VerticalAlignment="Center"/>
+                        </DockPanel>
+
                         <TextBlock Text="DEVELOPED BY" Style="{StaticResource CaptionText}" Margin="0,0,0,4"/>
                         <TextBlock Text="{Binding Company}" FontSize="16" FontWeight="SemiBold"
                                    Foreground="{StaticResource TextPrimaryBrush}"/>

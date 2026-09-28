@@ -5,6 +5,7 @@ using CollegeAdmin.Application.Auth;
 using CollegeAdmin.Application.Navigation;
 using CollegeAdmin.Application.Updates;
 using CollegeAdmin.Desktop.Navigation;
+using CollegeAdmin.Desktop.Theming;
 using CollegeAdmin.Desktop.ViewModels;
 using CollegeAdmin.Desktop.Views;
 using CollegeAdmin.Infrastructure;
@@ -31,6 +32,7 @@ public partial class App : System.Windows.Application
 {
     private IHost? _host;
     private bool _isTransitioningToLogin;
+    private readonly ThemeService _themeService = new();
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -40,6 +42,11 @@ public partial class App : System.Windows.Application
         // MainWindow exists, so "last window closed" would otherwise fire prematurely). Shutdown()
         // is called explicitly at the two points that should actually end the app.
         ShutdownMode = ShutdownMode.OnExplicitShutdown;
+
+        // Applied before any Window is constructed — see ThemeService.Apply's remarks on why that
+        // ordering matters. A first run (no saved preference yet) still applies the default here;
+        // RunStartupFlowAsync below offers the chooser and may re-apply a different pick.
+        _themeService.Apply(_themeService.LoadPreset());
 
         _host = Host.CreateDefaultBuilder()
             // Host.CreateDefaultBuilder() resolves appsettings.json relative to
@@ -59,11 +66,13 @@ public partial class App : System.Windows.Application
                     .AddApplication()
                     .AddInfrastructure(context.Configuration, currentAppVersion);
 
+                services.AddSingleton(_themeService);
                 services.AddTransient<LoginViewModel>();
                 services.AddTransient<LoginWindow>();
                 services.AddSingleton<INavigationService, NavigationService>();
                 services.AddTransient<PlaceholderPageViewModel>();
                 services.AddTransient<SettingsViewModel>();
+                services.AddTransient<HelpViewModel>();
                 services.AddTransient<AdminsListViewModel>();
                 services.AddTransient<BackgroundJobsViewModel>();
                 services.AddTransient<NoticeCreateViewModel>();
@@ -88,6 +97,18 @@ public partial class App : System.Windows.Application
     /// on first load, just moved earlier so the splash's status text means something.</summary>
     private async Task RunStartupFlowAsync()
     {
+        // Bootstrap theme step (per the user's "add a step in the bootstrap of the app to choose"
+        // instruction): only on a genuine first run, before the splash even appears — once a
+        // preference file exists this is skipped on every later launch. Re-opening the picker
+        // later lives in SettingsView (Appearance section), not here.
+        if (!_themeService.HasSavedPreference())
+        {
+            var chooser = new ThemeChooserWindow();
+            chooser.ShowDialog();
+            _themeService.SavePreset(chooser.SelectedPreset);
+            _themeService.Apply(chooser.SelectedPreset);
+        }
+
         var splash = new SplashWindow();
         splash.Show();
 

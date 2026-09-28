@@ -7,8 +7,11 @@
          instead, so the window can receive constructor-injected dependencies from later stages. -->
     <Application.Resources>
         <ResourceDictionary>
+            <!-- Indices 0 and 1 (palette, font) are swapped at runtime by ThemeService to apply a
+                 saved/chosen theme preset — see Theming/ThemeService.cs. Keep them first. -->
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Theme/Colors.xaml"/>
+                <ResourceDictionary Source="Theme/Fonts/SegoeFont.xaml"/>
                 <ResourceDictionary Source="Theme/Typography.xaml"/>
                 <ResourceDictionary Source="Theme/Controls.xaml"/>
             </ResourceDictionary.MergedDictionaries>

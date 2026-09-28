@@ -1,4 +1,5 @@
 using CollegeAdmin.Contracts.Api;
+using CollegeAdmin.Desktop.Theming;
 using CollegeAdmin.Desktop.ViewModels;
 using CollegeAdmin.Infrastructure.Api;
 using Microsoft.Extensions.Configuration;
@@ -24,7 +25,7 @@ public class SettingsViewModelTests
             PingToReturn = new PingResult { Status = "ok", Time = "2026-09-27T00:00:00Z" },
         };
 
-        var viewModel = new SettingsViewModel(apiClient, MakeConfiguration("http://localhost:8099/api/v1/"));
+        var viewModel = new SettingsViewModel(apiClient, MakeConfiguration("http://localhost:8099/api/v1/"), new ThemeService());
         await viewModel.LoadCommand.ExecuteAsync(null);
 
         Assert.Equal("Tech Bytes Design", viewModel.Company);
@@ -46,7 +47,7 @@ public class SettingsViewModelTests
             ThrowOnCredits = new ApiRequestException(new ApiErrorPayload { Code = "SERVER_ERROR", Message = "Failed.", Retryable = true }),
         };
 
-        var viewModel = new SettingsViewModel(apiClient, MakeConfiguration());
+        var viewModel = new SettingsViewModel(apiClient, MakeConfiguration(), new ThemeService());
         await viewModel.LoadCommand.ExecuteAsync(null);
 
         Assert.Equal("Failed.", viewModel.ErrorMessage);
@@ -61,7 +62,7 @@ public class SettingsViewModelTests
             ThrowOnPing = new ApiRequestException(new ApiErrorPayload { Code = "NETWORK_ERROR", Message = "Could not reach the server.", Retryable = true }),
         };
 
-        var viewModel = new SettingsViewModel(apiClient, MakeConfiguration());
+        var viewModel = new SettingsViewModel(apiClient, MakeConfiguration(), new ThemeService());
         await viewModel.LoadCommand.ExecuteAsync(null);
 
         Assert.False(viewModel.IsConnected);

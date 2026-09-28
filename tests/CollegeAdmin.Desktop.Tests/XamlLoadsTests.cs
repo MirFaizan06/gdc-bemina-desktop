@@ -1,6 +1,8 @@
 using System.Threading;
 using CollegeAdmin.Desktop.Converters;
+using CollegeAdmin.Desktop.Theming;
 using CollegeAdmin.Desktop.Views;
+using Microsoft.Extensions.Configuration;
 
 namespace CollegeAdmin.Desktop.Tests;
 
@@ -33,7 +35,12 @@ public class XamlLoadsTests
                 if (System.Windows.Application.Current is null)
                 {
                     var app = new System.Windows.Application();
-                    foreach (var source in new[] { "Theme/Colors.xaml", "Theme/Typography.xaml", "Theme/Controls.xaml" })
+                    // AppFont now lives in its own Theme/Fonts/*.xaml dictionary (ThemeService swaps
+                    // it at real app startup) rather than inline in Typography.xaml — every implicit
+                    // TextBlock/Button style resolves {StaticResource AppFont}, so it must be present
+                    // here too or every single one of these tests would fail, not just theme-related
+                    // ones.
+                    foreach (var source in new[] { "Theme/Colors.xaml", "Theme/Fonts/SegoeFont.xaml", "Theme/Typography.xaml", "Theme/Controls.xaml" })
                     {
                         var dictionary = new System.Windows.ResourceDictionary
                         {
@@ -42,12 +49,14 @@ public class XamlLoadsTests
                         app.Resources.MergedDictionaries.Add(dictionary);
                     }
 
-                    // App.xaml also registers these three converters directly (not via a merged
+                    // App.xaml also registers these five converters directly (not via a merged
                     // Theme dictionary) — every shared/error/empty-state view binds Visibility
                     // through them.
                     app.Resources["BoolToVisibility"] = new BoolToVisibilityConverter();
                     app.Resources["InverseBoolToVisibility"] = new InverseBoolToVisibilityConverter();
                     app.Resources["NullOrEmptyToCollapsed"] = new NullOrEmptyToCollapsedConverter();
+                    app.Resources["EqualsToVisibility"] = new EqualsToVisibilityConverter();
+                    app.Resources["NotNullToVisibility"] = new NotNullToVisibilityConverter();
                 }
 
                 action();
@@ -209,5 +218,46 @@ public class XamlLoadsTests
     {
         RunOnStaThread(() => _ = new UniversityRrExportWindow(
             new CollegeAdmin.Desktop.ViewModels.UniversityRrExportViewModel(new FakeApiClient(), new FakeLookupCache())));
+    }
+
+    /// <summary>Rewritten this phase (Appearance section added) — the new bindings
+    /// (CurrentThemeName/CurrentThemePrimaryHex) and the accent-Bg brushes used for each section's
+    /// icon badge are exactly the class of bug this test file exists to catch.</summary>
+    [Fact]
+    public void SettingsView_LoadsWithoutAResourceResolutionError()
+    {
+        RunOnStaThread(() =>
+        {
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?> { ["Api:BaseUrl"] = "http://localhost/api/v1/" })
+                .Build();
+            var view = new SettingsView
+            {
+                DataContext = new CollegeAdmin.Desktop.ViewModels.SettingsViewModel(
+                    new FakeApiClient(), configuration, new ThemeService()),
+            };
+            _ = view;
+        });
+    }
+
+    [Fact]
+    public void ThemeChooserWindow_LoadsWithoutAResourceResolutionError()
+    {
+        RunOnStaThread(() => _ = new ThemeChooserWindow());
+    }
+
+    /// <summary>New "Help & Docs" page — the role-chip DataTrigger style and the numbered-step/tip
+    /// templates are exactly the kind of thing a build-clean-but-runtime-broken binding hides.</summary>
+    [Fact]
+    public void HelpView_LoadsWithoutAResourceResolutionError()
+    {
+        RunOnStaThread(() =>
+        {
+            var view = new HelpView
+            {
+                DataContext = new CollegeAdmin.Desktop.ViewModels.HelpViewModel(new FakeAuthSessionService()),
+            };
+            _ = view;
+        });
     }
 }

@@ -1,0 +1,83 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- "Slate Professional" theme preset — same key set as Colors.xaml (the "Indigo Night"
+         default); see EmeraldPalette.xaml for why the accent/semantic colors are left unchanged. -->
+
+    <Color x:Key="PrimaryColor">#2563EB</Color>
+    <Color x:Key="PrimaryDarkColor">#1D4ED8</Color>
+    <Color x:Key="PrimaryLightColor">#EFF6FF</Color>
+
+    <Color x:Key="SidebarBgColor">#0F172A</Color>
+    <Color x:Key="SidebarHoverColor">#1E293B</Color>
+    <Color x:Key="SidebarSelectedColor">#2563EB</Color>
+    <Color x:Key="SidebarTextColor">#E2E8F0</Color>
+    <Color x:Key="SidebarTextMutedColor">#94A3B8</Color>
+
+    <Color x:Key="PageBgColor">#F1F5F9</Color>
+    <Color x:Key="SurfaceColor">#FFFFFF</Color>
+    <Color x:Key="BorderColor">#E2E8F0</Color>
+    <Color x:Key="BorderStrongColor">#CBD5E1</Color>
+
+    <Color x:Key="TextPrimaryColor">#0F172A</Color>
+    <Color x:Key="TextSecondaryColor">#475569</Color>
+    <Color x:Key="TextMutedColor">#94A3B8</Color>
+
+    <Color x:Key="SuccessColor">#16A34A</Color>
+    <Color x:Key="SuccessBgColor">#F0FDF4</Color>
+    <Color x:Key="DangerColor">#E11D48</Color>
+    <Color x:Key="DangerDarkColor">#BE123C</Color>
+    <Color x:Key="DangerBgColor">#FFF1F2</Color>
+    <Color x:Key="WarningColor">#D97706</Color>
+    <Color x:Key="WarningBgColor">#FFFBEB</Color>
+
+    <Color x:Key="AccentTealColor">#0D9488</Color>
+    <Color x:Key="AccentTealBgColor">#F0FDFA</Color>
+    <Color x:Key="AccentAmberColor">#D97706</Color>
+    <Color x:Key="AccentAmberBgColor">#FFFBEB</Color>
+    <Color x:Key="AccentRoseColor">#E11D48</Color>
+    <Color x:Key="AccentRoseBgColor">#FFF1F2</Color>
+    <Color x:Key="AccentSkyColor">#0284C7</Color>
+    <Color x:Key="AccentSkyBgColor">#F0F9FF</Color>
+    <Color x:Key="AccentVioletColor">#7C3AED</Color>
+    <Color x:Key="AccentVioletBgColor">#F5F3FF</Color>
+
+    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}"/>
+    <SolidColorBrush x:Key="PrimaryDarkBrush" Color="{StaticResource PrimaryDarkColor}"/>
+    <SolidColorBrush x:Key="PrimaryLightBrush" Color="{StaticResource PrimaryLightColor}"/>
+
+    <SolidColorBrush x:Key="SidebarBgBrush" Color="{StaticResource SidebarBgColor}"/>
+    <SolidColorBrush x:Key="SidebarHoverBrush" Color="{StaticResource SidebarHoverColor}"/>
+    <SolidColorBrush x:Key="SidebarSelectedBrush" Color="{StaticResource SidebarSelectedColor}"/>
+    <SolidColorBrush x:Key="SidebarTextBrush" Color="{StaticResource SidebarTextColor}"/>
+    <SolidColorBrush x:Key="SidebarTextMutedBrush" Color="{StaticResource SidebarTextMutedColor}"/>
+
+    <SolidColorBrush x:Key="PageBgBrush" Color="{StaticResource PageBgColor}"/>
+    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
+    <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
+    <SolidColorBrush x:Key="BorderStrongBrush" Color="{StaticResource BorderStrongColor}"/>
+
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimaryColor}"/>
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}"/>
+    <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource TextMutedColor}"/>
+
+    <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>
+    <SolidColorBrush x:Key="SuccessBgBrush" Color="{StaticResource SuccessBgColor}"/>
+    <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource DangerColor}"/>
+    <SolidColorBrush x:Key="DangerDarkBrush" Color="{StaticResource DangerDarkColor}"/>
+    <SolidColorBrush x:Key="DangerBgBrush" Color="{StaticResource DangerBgColor}"/>
+    <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}"/>
+    <SolidColorBrush x:Key="WarningBgBrush" Color="{StaticResource WarningBgColor}"/>
+
+    <SolidColorBrush x:Key="AccentTealBrush" Color="{StaticResource AccentTealColor}"/>
+    <SolidColorBrush x:Key="AccentTealBgBrush" Color="{StaticResource AccentTealBgColor}"/>
+    <SolidColorBrush x:Key="AccentAmberBrush" Color="{StaticResource AccentAmberColor}"/>
+    <SolidColorBrush x:Key="AccentAmberBgBrush" Color="{StaticResource AccentAmberBgColor}"/>
+    <SolidColorBrush x:Key="AccentRoseBrush" Color="{StaticResource AccentRoseColor}"/>
+    <SolidColorBrush x:Key="AccentRoseBgBrush" Color="{StaticResource AccentRoseBgColor}"/>
+    <SolidColorBrush x:Key="AccentSkyBrush" Color="{StaticResource AccentSkyColor}"/>
+    <SolidColorBrush x:Key="AccentSkyBgBrush" Color="{StaticResource AccentSkyBgColor}"/>
+    <SolidColorBrush x:Key="AccentVioletBrush" Color="{StaticResource AccentVioletColor}"/>
+    <SolidColorBrush x:Key="AccentVioletBgBrush" Color="{StaticResource AccentVioletBgColor}"/>
+
+</ResourceDictionary>

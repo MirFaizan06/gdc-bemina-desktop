@@ -118,6 +118,9 @@ public sealed partial class ShellViewModel : ObservableObject
             new NavItem("blogs", "Blogs", "Blogs"),
             new NavItem("pyqs", "PYQ", "PYQ"),
             new NavItem("system", "Settings", "Settings"),
+            // No NavCapabilities entry — same "always visible" treatment as "dashboard"/"system":
+            // documentation is useful to every role, including one with no other grants yet.
+            new NavItem("help", "Help & Docs", "Help"),
         };
 
         NavItems = new ObservableCollection<NavItem>(
